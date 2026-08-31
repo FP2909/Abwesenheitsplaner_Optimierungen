@@ -354,7 +354,11 @@
                     const key = `${emp.id}_${dateStr}`;
 
                     const tdCell = document.createElement('td');
-                    tdCell.className = `day-cell ${isSunday ? 'is-sunday' : ''}`;
+                    tdCell.className = 'day-cell';
+
+                    if (isSunday) {
+                    tdCell.classList.add('is-sunday');
+                    }
 
                     const statusVal = einfachePlanungsDaten[key] || aktuellePlanungsDaten[key];
                     if (statusVal && STATUS_CONFIG[statusVal]) {
