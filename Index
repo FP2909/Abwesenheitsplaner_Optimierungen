@@ -2,10 +2,11 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=Anwesenheitsplaner_PWA_V2.6.1.html">
 <title>Anwesenheitsplaner</title>
 </head>
 <body>
-<p>Weiterleitung...</p>
+<script>
+window.location.href = "Anwesenheitsplaner_PWA_V2.6.1.html";
+</script>
 </body>
 </html>
