@@ -347,41 +347,59 @@
     monthSelect.addEventListener('change', () => renderTabelle(aktuellePlanungsDaten));
     yearSelect.addEventListener('change', () => renderTabelle(aktuellePlanungsDaten));
 
-    // ==========================================
+  // ==========================================
     // A. FUNKTION ZUM SPEICHERN VON DATEN
     // ==========================================
     async function speichereDatenZentral(planungsDaten) {
+        // Welches Daten-Paket soll gespeichert werden?
+        const datenZuSpeichern = {
+            eintraege: planungsDaten || aktuellePlanungsDaten || {},
+            mitarbeiter: typeof MITARBEITER_LISTE !== 'undefined' ? MITARBEITER_LISTE : [],
+            statusConfig: typeof STATUS_CONFIG !== 'undefined' ? STATUS_CONFIG : {}
+        };
+
         try {
             const { data, error } = await supabaseClient
                 .from('anwesenheiten')
                 .upsert({
                     id: 'planung',
-                    eintraege: planungsDaten,
+                    eintraege: datenZuSpeichern,
                     updated_at: new Date().toISOString()
                 });
+
             if (error) throw error;
             console.log("Erfolgreich in Supabase gespeichert!");
         } catch (err) {
             console.error("Fehler beim Speichern:", err.message);
         }
     }
-
-    // ==========================================
+// ==========================================
     // B. FUNKTION ZUM LADEN & LIVE-SYNCHRONISIEREN
     // ==========================================
     // 1. Initiales Laden der Daten beim Start
     async function ladeZentraleDaten() {
-        const { data, error } = await supabaseClient
-            .from('anwesenheiten')
-            .select('eintraege')
-            .eq('id', 'planung')
-            .single();
+        try {
+            const { data, error } = await supabaseClient
+                .from('anwesenheiten')
+                .select('eintraege')
+                .eq('id', 'planung')
+                .single();
 
-        if (data && data.eintraege) {
-            aktuellePlanungsDaten = data.eintraege;
-            renderTabelle(data.eintraege);
-        } else {
-            renderTabelle({});
+            if (data && data.eintraege) {
+                // Automatische Erkennung: Neues Gesamt-Paket vs. altes reines Eintrags-Format
+                if (data.eintraege.eintraege) {
+                    aktuellePlanungsDaten = data.eintraege.eintraege || {};
+                    if (data.eintraege.mitarbeiter) MITARBEITER_LISTE = data.eintraege.mitarbeiter;
+                    if (data.eintraege.statusConfig) STATUS_CONFIG = data.eintraege.statusConfig;
+                } else {
+                    aktuellePlanungsDaten = data.eintraege;
+                }
+                renderTabelle();
+            } else {
+                renderTabelle();
+            }
+        } catch (err) {
+            console.error("Fehler beim Laden der Daten aus Supabase:", err.message);
         }
     }
 
@@ -394,8 +412,17 @@
                 (payload) => {
                     if (payload.new && payload.new.eintraege) {
                         console.log("Änderung von anderem Gerät empfangen!");
-                        aktuellePlanungsDaten = payload.new.eintraege;
-                        renderTabelle(payload.new.eintraege);
+                        const neuerZustand = payload.new.eintraege;
+
+                        if (neuerZustand.eintraege) {
+                            aktuellePlanungsDaten = neuerZustand.eintraege || {};
+                            if (neuerZustand.mitarbeiter) MITARBEITER_LISTE = neuerZustand.mitarbeiter;
+                            if (neuerZustand.statusConfig) STATUS_CONFIG = neuerZustand.statusConfig;
+                        } else {
+                            aktuellePlanungsDaten = neuerZustand;
+                        }
+
+                        renderTabelle();
                     }
                 }
             )
