@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Anwesenheitsplaner</title>
+  <title>Abwesenheitsplaner_Optimierungen</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -76,10 +76,10 @@
 
     // Zuerst typische Dateinamen bevorzugen
     const preferred = [
-      "Anwesenheit.html",
-      "Anwesenheitsplaner.html",
-      "anwesenheit.html",
-      "anwesenheitsplaner.html",
+      "Anwesenheit_optimierungen.html",
+      "Anwesenheitsplaner_optimierungen.html",
+      "anwesenheit_optimierungen.html",
+      "anwesenheitsplaner_optimierungen.html",
       "app.html"
     ];
 
