@@ -3,16 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0050aa">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Anwesenheitsplaner">
-    <link rel="manifest" href="manifest.webmanifest">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <title>An-/Abwesenheitsplaner</title>
-
-    <!-- Supabase JS Client via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -26,103 +17,31 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             color: #334155;
             margin: 0;
             padding: 15px;
         }
 
-        .site-header {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            background: var(--card-bg);
-            padding: 20px 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 15px;
-        }
-
-        .header-title-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .header-title-container h1 {
-            font-size: 20px;
-            margin: 0;
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
-        }
+        .container { max-width: 100%; margin: 0 auto; }
 
         .top-bar {
             display: flex;
-            flex-wrap: wrap;
             gap: 15px;
             background: var(--card-bg);
             padding: 12px 16px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             margin-bottom: 15px;
             align-items: center;
-            justify-content: flex-start;
         }
-
-        .date-selectors {
-            display: flex;
-            flex: 0 0 auto;
-            gap: 10px;
-            align-items: center;
-        }
-
-        select, input[type="text"] {
-            padding: 6px 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            font-size: 13px;
-        }
-
-        .action-buttons-container {
-            margin-left: 0px;
-            flex: 0 0 auto;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .btn-action {
-            padding: 6px 12px;
-            background: #0284c7;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 13px;
-            transition: background 0.15s ease;
-        }
-        .btn-action:hover { background: #0369a1; }
-
-        .btn-print { background: #0f766e; }
-        .btn-print:hover { background: #115e59; }
 
         .status-toolbar {
             display: flex;
-            flex-wrap: wrap;
             gap: 8px;
-            align-items: center;
             background: var(--card-bg);
             padding: 10px 16px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             margin-bottom: 15px;
         }
 
@@ -133,25 +52,19 @@
             cursor: pointer;
             font-weight: 600;
             font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.15s ease;
         }
 
         .status-btn.active {
             border-color: #000;
             transform: scale(1.04);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         .table-container {
-            max-height: 68vh;
+            max-height: 70vh;
             overflow: auto;
             background: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             border: 1px solid var(--border-color);
+            border-radius: 8px;
         }
 
         table {
@@ -159,7 +72,6 @@
             border-spacing: 0;
             width: 100%;
             font-size: 12px;
-            user-select: none;
         }
 
         th, td {
@@ -179,18 +91,14 @@
             left: 0;
             z-index: 5;
             background: #f8fafc;
-            width: 150px;
-            min-width: 150px;
-            max-width: 150px;
+            width: 160px;
+            min-width: 160px;
             text-align: left;
             padding-left: 8px;
             font-weight: 600;
         }
 
-        thead tr th.col-sticky-1 {
-            z-index: 15;
-            background: #e2e8f0;
-        }
+        thead tr th.col-sticky-1 { z-index: 15; background: #e2e8f0; }
 
         th.header-kw { background: #cbd5e1; height: 22px; font-weight: 700; font-size: 11px; }
         th.header-day { background: #f1f5f9; height: 22px; font-weight: 500; font-size: 11px; }
@@ -199,80 +107,49 @@
         td.day-cell {
             width: 28px;
             min-width: 28px;
-            height: 40px;
+            height: 36px;
             cursor: pointer;
             font-weight: bold;
             font-size: 11px;
-            transition: background 0.1s;
         }
 
-        td.day-cell:hover {
-            outline: 2px solid #0284c7;
-            z-index: 2;
-        }
-
+        /* Nur noch für Sonntage verwendet */
         .weekend {
             background-color: var(--weekend-bg) !important;
             color: var(--weekend-text) !important;
-        }
-
-        footer {
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            font-size: 11px;
-            color: #64748b;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-
-    <header class="site-header">
-        <div class="header-title-container">
-            <span style="font-size: 22px;">📅</span>
-            <h1>An-/Abwesenheitsplaner</h1>
-        </div>
-    </header>
-
     <div class="top-bar">
-        <div class="date-selectors">
-            <label for="monthSelect">Monat:</label>
+        <label>Monat:
             <select id="monthSelect">
                 <option value="0">Januar</option>
                 <option value="1">Februar</option>
                 <option value="2">März</option>
                 <option value="3">April</option>
-                <option value="4" selected>Mai</option>
+                <option value="4">Mai</option>
                 <option value="5">Juni</option>
                 <option value="6">Juli</option>
-                <option value="7">August</option>
+                <option value="7" selected>August</option>
                 <option value="8">September</option>
                 <option value="9">Oktober</option>
                 <option value="10">November</option>
                 <option value="11">Dezember</option>
             </select>
-
-            <label for="yearSelect">Jahr:</label>
+        </label>
+        <label>Jahr:
             <select id="yearSelect">
                 <option value="2025">2025</option>
                 <option value="2026" selected>2026</option>
                 <option value="2027">2027</option>
             </select>
-        </div>
-
-        <div class="action-buttons-container">
-            <button class="btn-action btn-print" onclick="window.print()">Drucken</button>
-        </div>
+        </label>
     </div>
 
-    <!-- Toolbar zur Auswahl des Status -->
     <div class="status-toolbar" id="statusToolbar">
-        <span>Status wählen:</span>
         <button class="status-btn active" data-status="OFFICE" style="background:#e0f2fe; color:#0369a1;">Office (O)</button>
         <button class="status-btn" data-status="HOME" style="background:#dcfce7; color:#15803d;">Home Office (HO)</button>
         <button class="status-btn" data-status="VACATION" style="background:#fef3c7; color:#b45309;">Urlaub (U)</button>
@@ -293,38 +170,27 @@
                     <th class="col-sticky-1">Datum</th>
                 </tr>
             </thead>
-            <tbody id="tableBody">
-            </tbody>
+            <tbody id="tableBody"></tbody>
         </table>
     </div>
-
-    <footer>
-        <span>Anwesenheitsplaner &copy; 2026</span>
-    </footer>
 </div>
 
 <script>
-    // ==========================================
-    // 1. SUPABASE INITIALISIERUNG
-    // ==========================================
     const SUPABASE_URL = 'https://cahhwvqdebadiietbufz.supabase.co/rest/v1/';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhaGh3dnFkZWJhZGlpZXRidWZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMzY4OTksImV4cCI6MjEwMzcxMjg5OX0.z4M1IHOhVYGDg6vWovIWRPiDgHgpjVNT0auDLKFoyu0';
-
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Aktuell ausgewählter Status
     let activeStatus = 'OFFICE';
-
-    // Lokaler Zwischenspeicher für alle Planungsdaten (eintraege)
     let aktuellePlanungsDaten = {};
 
-    // Standard-Mitarbeiter
     let MITARBEITER_LISTE = [
-        { id: "emp_1", name: "Max Mustermann" },
-        { id: "emp_2", name: "Erika Musterfrau" }
+        { id: "emp_1", name: "Krüger, Daniela" },
+        { id: "emp_2", name: "de Fuchs, Ana" },
+        { id: "emp_3", name: "Stark, Isolde" },
+        { id: "emp_4", name: "Förderer, Aliya" },
+        { id: "emp_5", name: "Straub, Franziska" }
     ];
 
-    // Status-Konfiguration für Optik & Texte
     let STATUS_CONFIG = {
         'OFFICE': { label: 'O', bg: '#e0f2fe', color: '#0369a1' },
         'HOME': { label: 'HO', bg: '#dcfce7', color: '#15803d' },
@@ -333,7 +199,6 @@
         'CLEAR': { label: '', bg: '', color: '' }
     };
 
-    // DOM Elemente
     const monthSelect = document.getElementById('monthSelect');
     const yearSelect = document.getElementById('yearSelect');
     const tableBody = document.getElementById('tableBody');
@@ -341,7 +206,6 @@
     const headerDays = document.getElementById('headerDays');
     const headerDates = document.getElementById('headerDates');
 
-    // Status-Buttons Event Handler
     document.querySelectorAll('.status-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
@@ -350,10 +214,10 @@
         });
     });
 
-    monthSelect.addEventListener('change', () => renderTabelle(aktuellePlanungsDaten));
-    yearSelect.addEventListener('change', () => renderTabelle(aktuellePlanungsDaten));
+    monthSelect.addEventListener('change', () => renderTabelle());
+    yearSelect.addEventListener('change', () => renderTabelle());
 
-    // Hilfsfunktion zur Berechung der ISO-Kalenderwoche
+    // Berechnet die ISO-Kalenderwoche
     function getISOWeek(date) {
         const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
         const dayNum = d.getUTCDay() || 7;
@@ -362,90 +226,31 @@
         return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
     }
 
-    // ==========================================
-    // A. FUNKTION ZUM SPEICHERN VON DATEN
-    // ==========================================
     async function speichereDatenZentral(planungsDaten) {
-        const datenZuSpeichern = {
-            eintraege: planungsDaten || aktuellePlanungsDaten || {},
-            mitarbeiter: typeof MITARBEITER_LISTE !== 'undefined' ? MITARBEITER_LISTE : [],
-            statusConfig: typeof STATUS_CONFIG !== 'undefined' ? STATUS_CONFIG : {}
-        };
-
         try {
-            const { data, error } = await supabaseClient
-                .from('anwesenheiten')
-                .upsert({
-                    id: 'planung',
-                    eintraege: datenZuSpeichern,
-                    updated_at: new Date().toISOString()
-                });
-
-            if (error) throw error;
-            console.log("Erfolgreich in Supabase gespeichert!");
+            await supabaseClient.from('anwesenheiten').upsert({
+                id: 'planung',
+                eintraege: { eintraege: planungsDaten, mitarbeiter: MITARBEITER_LISTE, statusConfig: STATUS_CONFIG },
+                updated_at: new Date().toISOString()
+            });
         } catch (err) {
-            console.error("Fehler beim Speichern:", err.message);
+            console.error("Speicherfehler:", err);
         }
     }
 
-    // ==========================================
-    // B. FUNKTION ZUM LADEN & LIVE-SYNCHRONISIEREN
-    // ==========================================
     async function ladeZentraleDaten() {
         try {
-            const { data, error } = await supabaseClient
-                .from('anwesenheiten')
-                .select('eintraege')
-                .eq('id', 'planung')
-                .single();
-
+            const { data } = await supabaseClient.from('anwesenheiten').select('eintraege').eq('id', 'planung').single();
             if (data && data.eintraege) {
-                if (data.eintraege.eintraege) {
-                    aktuellePlanungsDaten = data.eintraege.eintraege || {};
-                    if (data.eintraege.mitarbeiter) MITARBEITER_LISTE = data.eintraege.mitarbeiter;
-                    if (data.eintraege.statusConfig) STATUS_CONFIG = data.eintraege.statusConfig;
-                } else {
-                    aktuellePlanungsDaten = data.eintraege;
-                }
-                renderTabelle();
-            } else {
-                renderTabelle();
+                aktuellePlanungsDaten = data.eintraege.eintraege || {};
             }
         } catch (err) {
-            console.error("Fehler beim Laden der Daten aus Supabase:", err.message);
-            renderTabelle();
+            console.error("Ladefehler:", err);
         }
+        renderTabelle();
     }
 
-    function starteEchtzeitSync() {
-        supabaseClient
-            .channel('public:anwesenheiten')
-            .on('postgres_changes',
-                { event: 'UPDATE', schema: 'public', table: 'anwesenheiten' },
-                (payload) => {
-                    if (payload.new && payload.new.eintraege) {
-                        console.log("Änderung von anderem Gerät empfangen!");
-                        const neuerZustand = payload.new.eintraege;
-
-                        if (neuerZustand.eintraege) {
-                            aktuellePlanungsDaten = neuerZustand.eintraege || {};
-                            if (neuerZustand.mitarbeiter) MITARBEITER_LISTE = neuerZustand.mitarbeiter;
-                            if (neuerZustand.statusConfig) STATUS_CONFIG = neuerZustand.statusConfig;
-                        } else {
-                            aktuellePlanungsDaten = neuerZustand;
-                        }
-
-                        renderTabelle();
-                    }
-                }
-            )
-            .subscribe();
-    }
-
-    // ==========================================
-    // C. RENDER-FUNKTION FÜR DIE TABELLE
-    // ==========================================
-    function renderTabelle(eintraege = aktuellePlanungsDaten) {
+    function renderTabelle() {
         const year = parseInt(yearSelect.value);
         const month = parseInt(monthSelect.value);
         const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -456,46 +261,42 @@
 
         const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
-        // 1. Kalenderwochen & Tages-Header erstellen
         let currentKW = null;
-        let kwSpan = 0;
-        let kwThElement = null;
+        let currentKwTh = null;
 
+        // 1. Header generieren (KW, Wochentag, Tag-Nummer)
         for (let d = 1; d <= daysInMonth; d++) {
             const dateObj = new Date(year, month, d);
-            const dayOfWeek = dateObj.getDay();
-            // NUR Sonntag (0) gilt als rotes Wochenende (Samstag 6 bleibt normal)
-            const isWeekend = (dayOfWeek === 0);
+            const dayOfWeek = dateObj.getDay(); 
+            const isSunday = (dayOfWeek === 0); // NUR Sonntag wird rot markiert
 
-            // KW Logik
+            // KW-Zeile gruppieren
             const kw = getISOWeek(dateObj);
             if (kw !== currentKW) {
                 currentKW = kw;
-                kwSpan = 1;
-                kwThElement = document.createElement('th');
-                kwThElement.className = 'header-kw';
-                kwThElement.textContent = `KW ${kw}`;
-                headerKW.appendChild(kwThElement);
+                currentKwTh = document.createElement('th');
+                currentKwTh.className = 'header-kw';
+                currentKwTh.textContent = `KW ${kw}`;
+                currentKwTh.colSpan = 1;
+                headerKW.appendChild(currentKwTh);
             } else {
-                kwSpan++;
-                if (kwThElement) kwThElement.colSpan = kwSpan;
+                currentKwTh.colSpan += 1;
             }
 
-            // Tage (So, Mo, ...) Header
+            // Wochentag Header (Sa, So, Mo...)
             const thDay = document.createElement('th');
-            thDay.className = `header-day ${isWeekend ? 'weekend' : ''}`;
+            thDay.className = `header-day ${isSunday ? 'weekend' : ''}`;
             thDay.textContent = dayNames[dayOfWeek];
-
-            // Daten (1, 2, 3...) Header
-            const thNum = document.createElement('th');
-            thNum.className = `header-num ${isWeekend ? 'weekend' : ''}`;
-            thNum.textContent = d;
-
             headerDays.appendChild(thDay);
+
+            // Datums-Header (1, 2, 3...)
+            const thNum = document.createElement('th');
+            thNum.className = `header-num ${isSunday ? 'weekend' : ''}`;
+            thNum.textContent = d;
             headerDates.appendChild(thNum);
         }
 
-        // 2. Tabellenzellen erstellen
+        // 2. Tabellenzellen für Mitarbeiter generieren
         tableBody.innerHTML = '';
         MITARBEITER_LISTE.forEach(emp => {
             const tr = document.createElement('tr');
@@ -506,18 +307,15 @@
             tr.appendChild(tdName);
 
             for (let d = 1; d <= daysInMonth; d++) {
+                const dateObj = new Date(year, month, d);
+                const isSunday = (dateObj.getDay() === 0); // NUR Sonntag ist rot
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const key = `${emp.id}_${dateStr}`;
 
-                const dateObj = new Date(year, month, d);
-                // NUR Sonntag (0) ist rotes Wochenende
-                const isWeekend = (dateObj.getDay() === 0);
-
                 const tdCell = document.createElement('td');
-                tdCell.className = `day-cell ${isWeekend ? 'weekend' : ''}`;
+                tdCell.className = `day-cell ${isSunday ? 'weekend' : ''}`;
 
-                // Falls ein Status existiert
-                const statusVal = eintraege[key];
+                const statusVal = aktuellePlanungsDaten[key];
                 if (statusVal && STATUS_CONFIG[statusVal]) {
                     const cfg = STATUS_CONFIG[statusVal];
                     tdCell.textContent = cfg.label;
@@ -525,31 +323,23 @@
                     tdCell.style.color = cfg.color;
                 }
 
-                // Klick-Event
                 tdCell.addEventListener('click', () => {
                     if (activeStatus === 'CLEAR') {
-                        delete eintraege[key];
+                        delete aktuellePlanungsDaten[key];
                     } else {
-                        eintraege[key] = activeStatus;
+                        aktuellePlanungsDaten[key] = activeStatus;
                     }
-                    
-                    aktuellePlanungsDaten = eintraege;
-                    renderTabelle(eintraege);
-                    speichereDatenZentral(eintraege);
+                    renderTabelle();
+                    speichereDatenZentral(aktuellePlanungsDaten);
                 });
 
                 tr.appendChild(tdCell);
             }
-
             tableBody.appendChild(tr);
         });
     }
 
-    // Beim Aufruf der Seite ausführen
-    document.addEventListener("DOMContentLoaded", () => {
-        ladeZentraleDaten();
-        starteEchtzeitSync();
-    });
+    document.addEventListener("DOMContentLoaded", ladeZentraleDaten);
 </script>
 
 </body>
