@@ -2,15 +2,10 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="0; url=Anwesenheitsplaner_PWA_V2.6.1.html">
 <title>Anwesenheitsplaner</title>
 </head>
 <body>
-
-<script>
-window.location.href =
-"https://fp2909.github.io/Anwesenheit/Anwesenheitsplaner_PWA_V2.6.1.html";
-</script>
-
+<p>Weiterleitung...</p>
 </body>
 </html>
