@@ -171,7 +171,8 @@
         }
 
         thead tr:nth-child(1) th { position: sticky; top: 0; z-index: 10; }
-        thead tr:nth-child(2) th { position: sticky; top: 25px; z-index: 10; }
+        thead tr:nth-child(2) th { position: sticky; top: 22px; z-index: 10; }
+        thead tr:nth-child(3) th { position: sticky; top: 44px; z-index: 10; }
 
         th.col-sticky-1, td.col-sticky-1 {
             position: sticky;
@@ -191,6 +192,7 @@
             background: #e2e8f0;
         }
 
+        th.header-kw { background: #cbd5e1; height: 22px; font-weight: 700; font-size: 11px; }
         th.header-day { background: #f1f5f9; height: 22px; font-weight: 500; font-size: 11px; }
         th.header-num { background: #e2e8f0; height: 22px; font-weight: 700; }
 
@@ -211,7 +213,7 @@
 
         .weekend {
             background-color: var(--weekend-bg) !important;
-            color: var(--weekend-text);
+            color: var(--weekend-text) !important;
         }
 
         footer {
@@ -281,6 +283,9 @@
     <div class="table-container">
         <table id="attendanceTable">
             <thead>
+                <tr id="headerKW">
+                    <th class="col-sticky-1"></th>
+                </tr>
                 <tr id="headerDays">
                     <th class="col-sticky-1">Mitarbeiter</th>
                 </tr>
@@ -314,13 +319,13 @@
     let aktuellePlanungsDaten = {};
 
     // Standard-Mitarbeiter
-    const MITARBEITER_LISTE = [
+    let MITARBEITER_LISTE = [
         { id: "emp_1", name: "Max Mustermann" },
         { id: "emp_2", name: "Erika Musterfrau" }
     ];
 
     // Status-Konfiguration für Optik & Texte
-    const STATUS_CONFIG = {
+    let STATUS_CONFIG = {
         'OFFICE': { label: 'O', bg: '#e0f2fe', color: '#0369a1' },
         'HOME': { label: 'HO', bg: '#dcfce7', color: '#15803d' },
         'VACATION': { label: 'U', bg: '#fef3c7', color: '#b45309' },
@@ -332,6 +337,7 @@
     const monthSelect = document.getElementById('monthSelect');
     const yearSelect = document.getElementById('yearSelect');
     const tableBody = document.getElementById('tableBody');
+    const headerKW = document.getElementById('headerKW');
     const headerDays = document.getElementById('headerDays');
     const headerDates = document.getElementById('headerDates');
 
@@ -347,11 +353,19 @@
     monthSelect.addEventListener('change', () => renderTabelle(aktuellePlanungsDaten));
     yearSelect.addEventListener('change', () => renderTabelle(aktuellePlanungsDaten));
 
-  // ==========================================
+    // Hilfsfunktion zur Berechung der ISO-Kalenderwoche
+    function getISOWeek(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+
+    // ==========================================
     // A. FUNKTION ZUM SPEICHERN VON DATEN
     // ==========================================
     async function speichereDatenZentral(planungsDaten) {
-        // Welches Daten-Paket soll gespeichert werden?
         const datenZuSpeichern = {
             eintraege: planungsDaten || aktuellePlanungsDaten || {},
             mitarbeiter: typeof MITARBEITER_LISTE !== 'undefined' ? MITARBEITER_LISTE : [],
@@ -373,10 +387,10 @@
             console.error("Fehler beim Speichern:", err.message);
         }
     }
-// ==========================================
+
+    // ==========================================
     // B. FUNKTION ZUM LADEN & LIVE-SYNCHRONISIEREN
     // ==========================================
-    // 1. Initiales Laden der Daten beim Start
     async function ladeZentraleDaten() {
         try {
             const { data, error } = await supabaseClient
@@ -386,7 +400,6 @@
                 .single();
 
             if (data && data.eintraege) {
-                // Automatische Erkennung: Neues Gesamt-Paket vs. altes reines Eintrags-Format
                 if (data.eintraege.eintraege) {
                     aktuellePlanungsDaten = data.eintraege.eintraege || {};
                     if (data.eintraege.mitarbeiter) MITARBEITER_LISTE = data.eintraege.mitarbeiter;
@@ -400,10 +413,10 @@
             }
         } catch (err) {
             console.error("Fehler beim Laden der Daten aus Supabase:", err.message);
+            renderTabelle();
         }
     }
 
-    // 2. Live-Synchronisation einrichten (Echtzeit-Updates für alle Nutzer)
     function starteEchtzeitSync() {
         supabaseClient
             .channel('public:anwesenheiten')
@@ -429,30 +442,51 @@
             .subscribe();
     }
 
- // ==========================================
+    // ==========================================
     // C. RENDER-FUNKTION FÜR DIE TABELLE
     // ==========================================
-    function renderTabelle(eintraege = einfachePlanungsDaten || aktuellePlanungsDaten) {
+    function renderTabelle(eintraege = aktuellePlanungsDaten) {
         const year = parseInt(yearSelect.value);
         const month = parseInt(monthSelect.value);
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+        headerKW.innerHTML = '<th class="col-sticky-1"></th>';
         headerDays.innerHTML = '<th class="col-sticky-1">Mitarbeiter</th>';
         headerDates.innerHTML = '<th class="col-sticky-1">Datum</th>';
 
         const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
-        // Tages-Header erstellen
+        // 1. Kalenderwochen & Tages-Header erstellen
+        let currentKW = null;
+        let kwSpan = 0;
+        let kwThElement = null;
+
         for (let d = 1; d <= daysInMonth; d++) {
             const dateObj = new Date(year, month, d);
             const dayOfWeek = dateObj.getDay();
-            // Nur Sonntag (0) gilt als rotes Wochenende, Samstag (6) ist normaler Arbeitstag
-            const isWeekend = dayOfWeek === 0;
+            // NUR Sonntag (0) gilt als rotes Wochenende (Samstag 6 bleibt normal)
+            const isWeekend = (dayOfWeek === 0);
 
+            // KW Logik
+            const kw = getISOWeek(dateObj);
+            if (kw !== currentKW) {
+                currentKW = kw;
+                kwSpan = 1;
+                kwThElement = document.createElement('th');
+                kwThElement.className = 'header-kw';
+                kwThElement.textContent = `KW ${kw}`;
+                headerKW.appendChild(kwThElement);
+            } else {
+                kwSpan++;
+                if (kwThElement) kwThElement.colSpan = kwSpan;
+            }
+
+            // Tage (So, Mo, ...) Header
             const thDay = document.createElement('th');
             thDay.className = `header-day ${isWeekend ? 'weekend' : ''}`;
             thDay.textContent = dayNames[dayOfWeek];
 
+            // Daten (1, 2, 3...) Header
             const thNum = document.createElement('th');
             thNum.className = `header-num ${isWeekend ? 'weekend' : ''}`;
             thNum.textContent = d;
@@ -461,7 +495,7 @@
             headerDates.appendChild(thNum);
         }
 
-        // Tabelleninhalt bauen
+        // 2. Tabellenzellen erstellen
         tableBody.innerHTML = '';
         MITARBEITER_LISTE.forEach(emp => {
             const tr = document.createElement('tr');
@@ -476,13 +510,13 @@
                 const key = `${emp.id}_${dateStr}`;
 
                 const dateObj = new Date(year, month, d);
-                // Nur Sonntag (0) gilt als rotes Wochenende
-                const isWeekend = dateObj.getDay() === 0;
+                // NUR Sonntag (0) ist rotes Wochenende
+                const isWeekend = (dateObj.getDay() === 0);
 
                 const tdCell = document.createElement('td');
                 tdCell.className = `day-cell ${isWeekend ? 'weekend' : ''}`;
 
-                // Falls ein Status in den geladenen Daten existiert
+                // Falls ein Status existiert
                 const statusVal = eintraege[key];
                 if (statusVal && STATUS_CONFIG[statusVal]) {
                     const cfg = STATUS_CONFIG[statusVal];
@@ -491,7 +525,7 @@
                     tdCell.style.color = cfg.color;
                 }
 
-                // Klick-Event auf eine Zelle -> Daten lokal anpassen & zentral speichern
+                // Klick-Event
                 tdCell.addEventListener('click', () => {
                     if (activeStatus === 'CLEAR') {
                         delete eintraege[key];
@@ -501,8 +535,6 @@
                     
                     aktuellePlanungsDaten = eintraege;
                     renderTabelle(eintraege);
-                    
-                    // Supabase-Update ausführen
                     speichereDatenZentral(eintraege);
                 });
 
