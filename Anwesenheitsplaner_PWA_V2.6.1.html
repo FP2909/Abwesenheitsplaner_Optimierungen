@@ -57,31 +57,6 @@
             font-weight: 700;
         }
 
-        .header-title-container .user-info {
-            font-size: 13px;
-            color: #64748b;
-            font-weight: normal;
-        }
-
-        .header-brand-container {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .header-brand-container img {
-            height: 42px;
-            width: auto;
-            object-fit: contain;
-        }
-
-        .header-brand-container .company-title {
-            font-size: 18px;
-            font-weight: 800;
-            color: #1e293b;
-            letter-spacing: 1px;
-        }
-
         .container {
             max-width: 100%;
             margin: 0 auto;
@@ -136,14 +111,8 @@
         }
         .btn-action:hover { background: #0369a1; }
 
-        .btn-secondary { background: #64748b; }
-        .btn-secondary:hover { background: #475569; }
-
         .btn-print { background: #0f766e; }
         .btn-print:hover { background: #115e59; }
-
-        .btn-danger { background: #ef4444; }
-        .btn-danger:hover { background: #dc2626; }
 
         .status-toolbar {
             display: flex;
@@ -176,58 +145,6 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 650px;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-
-        .cat-item, .emp-item, .btn-item {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .cat-item input[type="text"], .emp-item input[type="text"], .btn-item input[type="text"] { flex: 1; }
-        .cat-item input[type="color"] { border: none; width: 32px; height: 64px; cursor: pointer; padding: 0; background: none; }
-
-        .btn-move {
-            padding: 4px 8px;
-            background: #e2e8f0;
-            color: #334155;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .btn-move:hover:not(:disabled) { background: #cbd5e1; }
-        .btn-move:disabled { opacity: 0.3; cursor: not-allowed; }
-
         .table-container {
             max-height: 68vh;
             overflow: auto;
@@ -255,7 +172,6 @@
 
         thead tr:nth-child(1) th { position: sticky; top: 0; z-index: 10; }
         thead tr:nth-child(2) th { position: sticky; top: 25px; z-index: 10; }
-        thead tr:nth-child(3) th { position: sticky; top: 48px; z-index: 10; }
 
         th.col-sticky-1, td.col-sticky-1 {
             position: sticky;
@@ -270,36 +186,24 @@
             font-weight: 600;
         }
 
-        th.col-sticky-2, td.col-sticky-2 {
-            position: sticky;
-            left: 0;
-            z-index: 5;
-            background: #f8fafc;
-            display:none; width:0;
-            font-size: 11px;
-            color: #64748b;
-        }
-
-        thead tr th.col-sticky-1, thead tr th.col-sticky-2 {
+        thead tr th.col-sticky-1 {
             z-index: 15;
             background: #e2e8f0;
         }
 
-        th.header-kw { background: #cbd5e1; color: #1e293b; font-weight: 700; height: 24px; font-size: 11px; }
         th.header-day { background: #f1f5f9; height: 22px; font-weight: 500; font-size: 11px; }
         th.header-num { background: #e2e8f0; height: 22px; font-weight: 700; }
 
         td.day-cell {
-            width: 26px;
-            min-width: 26px;
-            height: 56px;
+            width: 28px;
+            min-width: 28px;
+            height: 40px;
             cursor: pointer;
             font-weight: bold;
             font-size: 11px;
             transition: background 0.1s;
         }
 
-        tbody tr td { height:56px; }
         td.day-cell:hover {
             outline: 2px solid #0284c7;
             z-index: 2;
@@ -308,106 +212,6 @@
         .weekend {
             background-color: var(--weekend-bg) !important;
             color: var(--weekend-text);
-        }
-
-        .holiday {
-            color: #92400e !important;
-            font-weight: 700;
-        }
-
-        th.holiday {
-            background-color: #fde68a !important;
-        }
-
-        td.day-cell.holiday {
-            background-color: #fde68a;
-            background-image: linear-gradient(rgba(253, 230, 138, 0.58), rgba(253, 230, 138, 0.58));
-            background-blend-mode: multiply;
-        }
-
-        td.day-cell.holiday:hover {
-            outline: 2px solid #d97706;
-        }
-
-        .dept-header-row td {
-            background: #e2e8f0;
-            font-weight: 700;
-            text-align: left;
-            padding-left: 10px;
-            color: #1e293b;
-            height: 26px;
-            font-size: 12px;
-        }
-
-        th.col-summary, td.col-summary {
-            width: 45px;
-            min-width: 45px;
-            background: #f1f5f9;
-            font-size: 11px;
-        }
-
-        .legend {
-            margin-top: 10px;
-            display: flex;
-            gap: 15px;
-            font-size: 12px;
-            color: #64748b;
-            flex-wrap: wrap;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .legend-box {
-            width: 14px;
-            height: 14px;
-            border-radius: 2px;
-            display: inline-block;
-        }
-
-        @media print {
-            body {
-                background-color: #fff !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                font-size: 10pt;
-            }
-            .top-bar, .status-toolbar, .btn-action, .modal, .legend {
-                display: none !important;
-            }
-            .site-header {
-                box-shadow: none !important;
-                padding: 10px 0 !important;
-                margin-bottom: 10px !important;
-            }
-            .table-container {
-                max-height: none !important;
-                overflow: visible !important;
-                border: none !important;
-                box-shadow: none !important;
-            }
-            table {
-                width: 100% !important;
-                page-break-inside: auto;
-            }
-            tr {
-                page-break-inside: avoid;
-                page-break-after: auto;
-            }
-            th, td {
-                border: 1px solid #94a3b8 !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            th.col-sticky-1, td.col-sticky-1, th.col-sticky-2, td.col-sticky-2 {
-                position: static !important;
-            }
-            @page {
-                size: A4 landscape;
-                margin: 1cm;
-            }
         }
 
         footer {
@@ -420,46 +224,6 @@
             font-size: 11px;
             color: #64748b;
         }
-
-        html, body { min-height: 100%; }
-        body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
-        button, select, input { touch-action: manipulation; }
-        .install-app-btn { display:none; }
-        @media (max-width: 700px) {
-            body { padding: 6px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
-            .site-header { padding: 10px 8px; margin-bottom: 7px; border-radius: 7px; gap: 8px; }
-            .header-title-container { gap: 6px; min-width: 0; }
-            .header-title-container h1 { font-size: 15px; white-space: nowrap; }
-            .header-title-container > span:first-child { font-size: 18px !important; }
-            .header-brand-container { gap: 5px; min-width: 0; }
-            .header-brand-container img { height: 30px; max-width: 125px; }
-            .header-brand-container .company-title { display:none; }
-            .top-bar { padding: 7px 8px; gap: 7px; margin-bottom: 7px; align-items: stretch; }
-            .date-selectors { gap: 6px; flex: 1 1 100%; justify-content: flex-start; }
-            .date-selectors label { font-size: 12px; flex:1; }
-            .date-selectors input, .date-selectors select { width: 100% !important; box-sizing: border-box; min-height: 34px; font-size: 14px; }
-            .action-buttons-container { flex: 1 1 100%; display:flex; flex-wrap: nowrap; overflow-x:auto; padding-bottom: 2px; scrollbar-width:none; }
-            .action-buttons-container::-webkit-scrollbar { display:none; }
-            .action-buttons-container button { flex: 0 0 auto; min-height: 36px; font-size: 12px; padding: 7px 10px; }
-            .status-toolbar { padding: 7px 8px; margin-bottom: 7px; gap: 6px; overflow-x:auto; flex-wrap: nowrap; scrollbar-width:none; }
-            .status-toolbar::-webkit-scrollbar { display:none; }
-            .status-toolbar > span { flex:0 0 auto; font-size: 11px; }
-            .status-btn { flex:0 0 auto; min-height: 34px; padding: 6px 9px; font-size: 11px; }
-            .table-container { max-height: calc(100vh - 190px); min-height: 45vh; border-radius: 6px; -webkit-overflow-scrolling: touch; }
-            table { width: max-content; min-width: 100%; font-size: 11px; }
-            th.col-sticky-1, td.col-sticky-1 { width: 125px; min-width:125px; max-width:125px; }
-            td.day-cell { width: 29px; min-width:29px; height: 64px; font-size: 11px; }
-            th.header-day, th.header-num, th.header-kw { font-size: 10px; }
-            .legend { margin: 7px 3px 0; gap: 8px; font-size: 10px; }
-            footer { margin-top: 10px; padding-top: 8px; font-size: 9px; flex-direction:column; gap:3px; text-align:center; }
-            .modal-content { width: calc(100% - 18px); max-width:none; max-height: 88vh; padding: 12px; box-sizing:border-box; }
-            .cat-item, .emp-item, .btn-item { flex-wrap: wrap; }
-            .cat-item input[type="text"]:nth-of-type(2), .emp-item input[type="text"] { min-width: 150px; }
-            .install-app-btn { display:inline-flex; align-items:center; justify-content:center; }
-        }
-        @media (display-mode: standalone) {
-            body { padding-top: max(6px, env(safe-area-inset-top)); }
-        }
     </style>
 </head>
 <body>
@@ -470,12 +234,9 @@
         <div class="header-title-container">
             <span style="font-size: 22px;">📅</span>
             <h1>An-/Abwesenheitsplaner</h1>
-            <span class="user-info"></span>
         </div>
-        <div class="header-brand-container">
-            <img src="data:image/png;base64,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 retention.
+    </header>
 
-    <!-- Hauptbereich & Tabellenstruktur -->
     <div class="top-bar">
         <div class="date-selectors">
             <label for="monthSelect">Monat:</label>
@@ -484,7 +245,7 @@
                 <option value="1">Februar</option>
                 <option value="2">März</option>
                 <option value="3">April</option>
-                <option value="4">Mai</option>
+                <option value="4" selected>Mai</option>
                 <option value="5">Juni</option>
                 <option value="6">Juli</option>
                 <option value="7">August</option>
@@ -507,16 +268,27 @@
         </div>
     </div>
 
+    <!-- Toolbar zur Auswahl des Status -->
+    <div class="status-toolbar" id="statusToolbar">
+        <span>Status wählen:</span>
+        <button class="status-btn active" data-status="OFFICE" style="background:#e0f2fe; color:#0369a1;">Office (O)</button>
+        <button class="status-btn" data-status="HOME" style="background:#dcfce7; color:#15803d;">Home Office (HO)</button>
+        <button class="status-btn" data-status="VACATION" style="background:#fef3c7; color:#b45309;">Urlaub (U)</button>
+        <button class="status-btn" data-status="ILLNESS" style="background:#fee2e2; color:#b91c1c;">Krank (K)</button>
+        <button class="status-btn" data-status="CLEAR" style="background:#f1f5f9; color:#475569;">Löschen (-)</button>
+    </div>
+
     <div class="table-container">
-        <!-- Dynamische Anwesenheitstabelle wird hier geladen -->
         <table id="attendanceTable">
             <thead>
-                <tr>
+                <tr id="headerDays">
                     <th class="col-sticky-1">Mitarbeiter</th>
-                    <th>Status-Daten werden via Supabase geladen...</th>
+                </tr>
+                <tr id="headerDates">
+                    <th class="col-sticky-1">Datum</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="tableBody">
             </tbody>
         </table>
     </div>
@@ -530,50 +302,192 @@
     // ==========================================
     // 1. SUPABASE INITIALISIERUNG
     // ==========================================
-    // Ersetzen Sie diese Werte mit Ihren eigenen Supabase-Projektdaten:
-    const SUPABASE_URL = 'https://IHRE-PROJEKT-ID.supabase.co';
-    const SUPABASE_ANON_KEY = 'IHR-ANON-PUBLIC-KEY';
+    const SUPABASE_URL = 'https://cahhwvqdebadiietbufz.supabase.co/rest/v1/';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhaGh3dnFkZWJhZGlpZXRidWZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMzY4OTksImV4cCI6MjEwMzcxMjg5OX0.z4M1IHOhVYGDg6vWovIWRPiDgHgpjVNT0auDLKFoyu0';
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Aktuell ausgewählter Status
+    let activeStatus = 'OFFICE';
+
+    // Lokaler Zwischenspeicher für alle Planungsdaten (eintraege)
+    let aktuellePlanungsDaten = {};
+
+    // Standard-Mitarbeiter
+    const MITARBEITER_LISTE = [
+        { id: "emp_1", name: "Max Mustermann" },
+        { id: "emp_2", name: "Erika Musterfrau" }
+    ];
+
+    // Status-Konfiguration für Optik & Texte
+    const STATUS_CONFIG = {
+        'OFFICE': { label: 'O', bg: '#e0f2fe', color: '#0369a1' },
+        'HOME': { label: 'HO', bg: '#dcfce7', color: '#15803d' },
+        'VACATION': { label: 'U', bg: '#fef3c7', color: '#b45309' },
+        'ILLNESS': { label: 'K', bg: '#fee2e2', color: '#b91c1c' },
+        'CLEAR': { label: '', bg: '', color: '' }
+    };
+
+    // DOM Elemente
+    const monthSelect = document.getElementById('monthSelect');
+    const yearSelect = document.getElementById('yearSelect');
+    const tableBody = document.getElementById('tableBody');
+    const headerDays = document.getElementById('headerDays');
+    const headerDates = document.getElementById('headerDates');
+
+    // Status-Buttons Event Handler
+    document.querySelectorAll('.status-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            activeStatus = e.currentTarget.dataset.status;
+        });
+    });
+
+    monthSelect.addEventListener('change', () => renderTabelle(aktuellePlanungsDaten));
+    yearSelect.addEventListener('change', () => renderTabelle(aktuellePlanungsDaten));
 
     // ==========================================
-    // 2. SUPABASE DATENBANK-FUNKTIONEN
+    // A. FUNKTION ZUM SPEICHERN VON DATEN
     // ==========================================
-
-    // Anwesenheitsdaten für einen bestimmten Zeitraum abrufen
-    async function fetchAttendances(startDate, endDate) {
-        const { data, error } = await supabase
-            .from('attendances')
-            .select('*')
-            .gte('date', startDate)
-            .lte('date', endDate);
-
-        if (error) {
-            console.error('Fehler beim Abrufen der Daten:', error.message);
-            return [];
+    async function speichereDatenZentral(planungsDaten) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('anwesenheiten')
+                .upsert({
+                    id: 'planung',
+                    eintraege: planungsDaten,
+                    updated_at: new Date().toISOString()
+                });
+            if (error) throw error;
+            console.log("Erfolgreich in Supabase gespeichert!");
+        } catch (err) {
+            console.error("Fehler beim Speichern:", err.message);
         }
-        return data;
     }
 
-    // Status eines Mitarbeiters speichern oder aktualisieren
-    async function saveAttendance(employeeId, dateStr, statusId) {
-        const { data, error } = await supabase
-            .from('attendances')
-            .upsert(
-                { employee_id: employeeId, date: dateStr, status_id: statusId },
-                { onConflict: 'employee_id, date' }
-            );
+    // ==========================================
+    // B. FUNKTION ZUM LADEN & LIVE-SYNCHRONISIEREN
+    // ==========================================
+    // 1. Initiales Laden der Daten beim Start
+    async function ladeZentraleDaten() {
+        const { data, error } = await supabaseClient
+            .from('anwesenheiten')
+            .select('eintraege')
+            .eq('id', 'planung')
+            .single();
 
-        if (error) {
-            console.error('Fehler beim Speichern:', error.message);
+        if (data && data.eintraege) {
+            aktuellePlanungsDaten = data.eintraege;
+            renderTabelle(data.eintraege);
         } else {
-            console.log('Status erfolgreich aktualisiert:', data);
+            renderTabelle({});
         }
     }
 
-    // Initialisierung beim Laden der Seite
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log("Anwesenheitsplaner & Supabase bereit.");
+    // 2. Live-Synchronisation einrichten (Echtzeit-Updates für alle Nutzer)
+    function starteEchtzeitSync() {
+        supabaseClient
+            .channel('public:anwesenheiten')
+            .on('postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'anwesenheiten' },
+                (payload) => {
+                    if (payload.new && payload.new.eintraege) {
+                        console.log("Änderung von anderem Gerät empfangen!");
+                        aktuellePlanungsDaten = payload.new.eintraege;
+                        renderTabelle(payload.new.eintraege);
+                    }
+                }
+            )
+            .subscribe();
+    }
+
+    // ==========================================
+    // C. RENDER-FUNKTION FÜR DIE TABELLE
+    // ==========================================
+    function renderTabelle(eintraege = {}) {
+        const year = parseInt(yearSelect.value);
+        const month = parseInt(monthSelect.value);
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        headerDays.innerHTML = '<th class="col-sticky-1">Mitarbeiter</th>';
+        headerDates.innerHTML = '<th class="col-sticky-1">Datum</th>';
+
+        const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+        // Tages-Header erstellen
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateObj = new Date(year, month, d);
+            const dayOfWeek = dateObj.getDay();
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+            const thDay = document.createElement('th');
+            thDay.className = `header-day ${isWeekend ? 'weekend' : ''}`;
+            thDay.textContent = dayNames[dayOfWeek];
+
+            const thNum = document.createElement('th');
+            thNum.className = `header-num ${isWeekend ? 'weekend' : ''}`;
+            thNum.textContent = d;
+
+            headerDays.appendChild(thDay);
+            headerDates.appendChild(thNum);
+        }
+
+        // Tabelleninhalt bauen
+        tableBody.innerHTML = '';
+        MITARBEITER_LISTE.forEach(emp => {
+            const tr = document.createElement('tr');
+
+            const tdName = document.createElement('td');
+            tdName.className = 'col-sticky-1';
+            tdName.textContent = emp.name;
+            tr.appendChild(tdName);
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const key = `${emp.id}_${dateStr}`;
+
+                const dateObj = new Date(year, month, d);
+                const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+
+                const tdCell = document.createElement('td');
+                tdCell.className = `day-cell ${isWeekend ? 'weekend' : ''}`;
+
+                // Falls ein Status in den geladenen Daten existiert
+                const statusVal = eintraege[key];
+                if (statusVal && STATUS_CONFIG[statusVal]) {
+                    const cfg = STATUS_CONFIG[statusVal];
+                    tdCell.textContent = cfg.label;
+                    tdCell.style.backgroundColor = cfg.bg;
+                    tdCell.style.color = cfg.color;
+                }
+
+                // Klick-Event auf eine Zelle -> Daten lokal anpassen & zentral speichern
+                tdCell.addEventListener('click', () => {
+                    if (activeStatus === 'CLEAR') {
+                        delete eintraege[key];
+                    } else {
+                        eintraege[key] = activeStatus;
+                    }
+                    
+                    aktuellePlanungsDaten = eintraege;
+                    renderTabelle(eintraege);
+                    
+                    // Supabase-Update ausführen
+                    speichereDatenZentral(eintraege);
+                });
+
+                tr.appendChild(tdCell);
+            }
+
+            tableBody.appendChild(tr);
+        });
+    }
+
+    // Beim Aufruf der Seite ausführen
+    document.addEventListener("DOMContentLoaded", () => {
+        ladeZentraleDaten();
+        starteEchtzeitSync();
     });
 </script>
 
