@@ -350,7 +350,7 @@
 
                 for (let d = 1; d <= daysInMonth; d++) {
                     const dateObj = new Date(year, month, d);
-                    const isSunday = (dateObj.getDay() === 0);
+                    const isSunday = dateObj.getDay() === 0;
                     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                     const key = `${emp.id}_${dateStr}`;
 
