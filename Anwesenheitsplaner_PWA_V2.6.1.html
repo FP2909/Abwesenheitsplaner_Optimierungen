@@ -12,7 +12,6 @@
             --card-bg: #ffffff;
             --primary: #1e293b;
             --border-color: #cbd5e1;
-            /* Nur für Sonntage */
             --sunday-bg: #fee2e2;
             --sunday-text: #991b1b;
         }
@@ -106,6 +105,7 @@
         th.header-day { background: #f1f5f9; height: 22px; font-weight: 500; font-size: 11px; }
         th.header-num { background: #e2e8f0; height: 22px; font-weight: 700; }
 
+        /* Standardmäßig alle Tage (einschl. Samstag) weiß */
         td.day-cell {
             width: 28px;
             min-width: 28px;
@@ -113,10 +113,10 @@
             cursor: pointer;
             font-weight: bold;
             font-size: 11px;
-            background-color: #ffffff; /* Samstage & Werktage sind rein weiß */
+            background-color: #ffffff !important;
         }
 
-        /* NUR FÜR SONNTAGE */
+        /* Ausschließlich Sonntage werden eingefärbt */
         .is-sunday {
             background-color: var(--sunday-bg) !important;
             color: var(--sunday-text) !important;
@@ -143,8 +143,8 @@
                 <option value="4">Mai</option>
                 <option value="5">Juni</option>
                 <option value="6">Juli</option>
-                <option value="7">August</option>
-                <option value="8" selected>September</option>
+                <option value="7" selected>August</option>
+                <option value="8">September</option>
                 <option value="9">Oktober</option>
                 <option value="10">November</option>
                 <option value="11">Dezember</option>
@@ -166,8 +166,8 @@
         <button class="status-btn" data-status="OVERTIME" style="background:#fef08a; color:#854d0e;">Überstundenabbau (Ü)</button>
         <button class="status-btn" data-status="TRAINING" style="background:#fed7aa; color:#9a3412;">Schulung (S)</button>
         <button class="status-btn" data-status="EARLY" style="background:#bfdbfe; color:#1e40af;">Frühschicht (F)</button>
-        <button class="status-btn" data-status="LATE" style="background:#818cf8; color:#312e81;">Spätschicht (SP)</button>
-        <button class="status-btn" data-status="INTERMEDIATE" style="background:#c084fc; color:#581c87;">Zwischenschicht (ZS)</button>
+        <button class="status-btn" data-status="LATE" style="background:#818cf8; color:#ffffff;">Spätschicht (SP)</button>
+        <button class="status-btn" data-status="INTERMEDIATE" style="background:#c084fc; color:#ffffff;">Zwischenschicht (ZS)</button>
         <button class="status-btn" data-status="CLEAR" style="background:#f1f5f9; color:#475569;">Löschen</button>
     </div>
 
@@ -195,6 +195,7 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let activeStatus = 'VACATION';
+    let einfachePlanungsDaten = {};
     let aktuellePlanungsDaten = {};
 
     let MITARBEITER_GROUPS = [
@@ -245,7 +246,7 @@
     monthSelect.addEventListener('change', () => renderTabelle());
     yearSelect.addEventListener('change', () => renderTabelle());
 
-    // DIN ISO-8601 KW-Berechnung (Montag als 1. Tag der Woche)
+    // ISO-8601 Berechnung für Wochen (Montag bis Sonntag)
     function getISOWeek(date) {
         const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
         const dayNum = d.getUTCDay() || 7;
@@ -271,6 +272,7 @@
             const { data } = await supabaseClient.from('anwesenheiten').select('eintraege').eq('id', 'planung').single();
             if (data && data.eintraege) {
                 aktuellePlanungsDaten = data.eintraege.eintraege || {};
+                einfachePlanungsDaten = aktuellePlanungsDaten;
             }
         } catch (err) {
             console.error("Ladefehler:", err);
@@ -292,13 +294,13 @@
         let currentKW = null;
         let currentKwTh = null;
 
-        // 1. Header (KW, Wochentag, Tag) aufbauen
+        // 1. Kopfzeilen aufbauen
         for (let d = 1; d <= daysInMonth; d++) {
             const dateObj = new Date(year, month, d);
             const dayOfWeek = dateObj.getDay(); 
-            const isSunday = (dayOfWeek === 0); // EXKLUSIV nur Sonntag ist rosa!
+            const isSunday = (dayOfWeek === 0); // Ausschließliche Prüfung auf Sonntag
 
-            // KW Zusammenfassung
+            // KW-Balken dynamisch gruppieren
             const kw = getISOWeek(dateObj);
             if (kw !== currentKW) {
                 currentKW = kw;
@@ -311,24 +313,24 @@
                 currentKwTh.colSpan += 1;
             }
 
-            // Wochentag Header
+            // Wochentag-Kopf
             const thDay = document.createElement('th');
             thDay.className = `header-day ${isSunday ? 'is-sunday' : ''}`;
             thDay.textContent = dayNames[dayOfWeek];
             headerDays.appendChild(thDay);
 
-            // Datums-Nummer Header
+            // Tageszahl-Kopf
             const thNum = document.createElement('th');
             thNum.className = `header-num ${isSunday ? 'is-sunday' : ''}`;
             thNum.textContent = d;
             headerDates.appendChild(thNum);
         }
 
-        // 2. Tabellenzeilen gruppiert rendern
+        // 2. Tabellenzeilen rendern
         tableBody.innerHTML = '';
         
         MITARBEITER_GROUPS.forEach(group => {
-            // Kategorie-Zeile (z.B. "Abteilungsleitung" / "Team")
+            // Gruppentitel (z.B. "Abteilungsleitung")
             const trCat = document.createElement('tr');
             trCat.className = 'category-row';
             const tdCat = document.createElement('td');
@@ -337,7 +339,7 @@
             trCat.appendChild(tdCat);
             tableBody.appendChild(trCat);
 
-            // Mitarbeiter der Kategorie
+            // Mitarbeiter-Zeilen
             group.members.forEach(emp => {
                 const tr = document.createElement('tr');
 
@@ -348,14 +350,14 @@
 
                 for (let d = 1; d <= daysInMonth; d++) {
                     const dateObj = new Date(year, month, d);
-                    const isSunday = (dateObj.getDay() === 0); // Exklusiv nur Sonntag
+                    const isSunday = (dateObj.getDay() === 0);
                     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                     const key = `${emp.id}_${dateStr}`;
 
                     const tdCell = document.createElement('td');
                     tdCell.className = `day-cell ${isSunday ? 'is-sunday' : ''}`;
 
-                    const statusVal = aktuellePlanungsDaten[key];
+                    const statusVal = einfachePlanungsDaten[key] || aktuellePlanungsDaten[key];
                     if (statusVal && STATUS_CONFIG[statusVal]) {
                         const cfg = STATUS_CONFIG[statusVal];
                         tdCell.textContent = cfg.label;
@@ -365,8 +367,10 @@
 
                     tdCell.addEventListener('click', () => {
                         if (activeStatus === 'CLEAR') {
+                            delete einfachePlanungsDaten[key];
                             delete aktuellePlanungsDaten[key];
                         } else {
+                            einfachePlanungsDaten[key] = activeStatus;
                             aktuellePlanungsDaten[key] = activeStatus;
                         }
                         renderTabelle();
