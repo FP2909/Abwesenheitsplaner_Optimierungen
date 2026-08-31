@@ -12,8 +12,9 @@
             --card-bg: #ffffff;
             --primary: #1e293b;
             --border-color: #cbd5e1;
-            --weekend-bg: #fee2e2;
-            --weekend-text: #991b1b;
+            /* Nur für Sonntage */
+            --sunday-bg: #fee2e2;
+            --sunday-text: #991b1b;
         }
 
         body {
@@ -43,6 +44,7 @@
             padding: 10px 16px;
             border-radius: 8px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
         }
 
         .status-btn {
@@ -111,12 +113,20 @@
             cursor: pointer;
             font-weight: bold;
             font-size: 11px;
+            background-color: #ffffff; /* Samstage & Werktage sind rein weiß */
         }
 
-        /* Nur noch für Sonntage verwendet */
-        .weekend {
-            background-color: var(--weekend-bg) !important;
-            color: var(--weekend-text) !important;
+        /* NUR FÜR SONNTAGE */
+        .is-sunday {
+            background-color: var(--sunday-bg) !important;
+            color: var(--sunday-text) !important;
+        }
+
+        .category-row td {
+            background-color: #e2e8f0;
+            font-weight: bold;
+            text-align: left;
+            padding-left: 8px;
         }
     </style>
 </head>
@@ -133,8 +143,8 @@
                 <option value="4">Mai</option>
                 <option value="5">Juni</option>
                 <option value="6">Juli</option>
-                <option value="7" selected>August</option>
-                <option value="8">September</option>
+                <option value="7">August</option>
+                <option value="8" selected>September</option>
                 <option value="9">Oktober</option>
                 <option value="10">November</option>
                 <option value="11">Dezember</option>
@@ -150,11 +160,15 @@
     </div>
 
     <div class="status-toolbar" id="statusToolbar">
-        <button class="status-btn active" data-status="OFFICE" style="background:#e0f2fe; color:#0369a1;">Office (O)</button>
-        <button class="status-btn" data-status="HOME" style="background:#dcfce7; color:#15803d;">Home Office (HO)</button>
-        <button class="status-btn" data-status="VACATION" style="background:#fef3c7; color:#b45309;">Urlaub (U)</button>
+        <button class="status-btn active" data-status="VACATION" style="background:#dcfce7; color:#15803d;">Urlaub (U)</button>
+        <button class="status-btn" data-status="HALF_VACATION" style="background:#bbf7d0; color:#166534;">Halber Urlaub (0,5)</button>
         <button class="status-btn" data-status="ILLNESS" style="background:#fee2e2; color:#b91c1c;">Krank (K)</button>
-        <button class="status-btn" data-status="CLEAR" style="background:#f1f5f9; color:#475569;">Löschen (-)</button>
+        <button class="status-btn" data-status="OVERTIME" style="background:#fef08a; color:#854d0e;">Überstundenabbau (Ü)</button>
+        <button class="status-btn" data-status="TRAINING" style="background:#fed7aa; color:#9a3412;">Schulung (S)</button>
+        <button class="status-btn" data-status="EARLY" style="background:#bfdbfe; color:#1e40af;">Frühschicht (F)</button>
+        <button class="status-btn" data-status="LATE" style="background:#818cf8; color:#312e81;">Spätschicht (SP)</button>
+        <button class="status-btn" data-status="INTERMEDIATE" style="background:#c084fc; color:#581c87;">Zwischenschicht (ZS)</button>
+        <button class="status-btn" data-status="CLEAR" style="background:#f1f5f9; color:#475569;">Löschen</button>
     </div>
 
     <div class="table-container">
@@ -180,22 +194,36 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhaGh3dnFkZWJhZGlpZXRidWZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMzY4OTksImV4cCI6MjEwMzcxMjg5OX0.z4M1IHOhVYGDg6vWovIWRPiDgHgpjVNT0auDLKFoyu0';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let activeStatus = 'OFFICE';
+    let activeStatus = 'VACATION';
     let aktuellePlanungsDaten = {};
 
-    let MITARBEITER_LISTE = [
-        { id: "emp_1", name: "Krüger, Daniela" },
-        { id: "emp_2", name: "de Fuchs, Ana" },
-        { id: "emp_3", name: "Stark, Isolde" },
-        { id: "emp_4", name: "Förderer, Aliya" },
-        { id: "emp_5", name: "Straub, Franziska" }
+    let MITARBEITER_GROUPS = [
+        {
+            category: "Abteilungsleitung",
+            members: [
+                { id: "emp_1", name: "Krüger, Daniela" }
+            ]
+        },
+        {
+            category: "Team",
+            members: [
+                { id: "emp_2", name: "de Fuchs, Ana" },
+                { id: "emp_3", name: "Stark, Isolde" },
+                { id: "emp_4", name: "Förderer, Aliya" },
+                { id: "emp_5", name: "Straub, Franziska" }
+            ]
+        }
     ];
 
     let STATUS_CONFIG = {
-        'OFFICE': { label: 'O', bg: '#e0f2fe', color: '#0369a1' },
-        'HOME': { label: 'HO', bg: '#dcfce7', color: '#15803d' },
-        'VACATION': { label: 'U', bg: '#fef3c7', color: '#b45309' },
+        'VACATION': { label: 'U', bg: '#dcfce7', color: '#15803d' },
+        'HALF_VACATION': { label: '½', bg: '#bbf7d0', color: '#166534' },
         'ILLNESS': { label: 'K', bg: '#fee2e2', color: '#b91c1c' },
+        'OVERTIME': { label: 'Ü', bg: '#fef08a', color: '#854d0e' },
+        'TRAINING': { label: 'S', bg: '#fed7aa', color: '#9a3412' },
+        'EARLY': { label: 'F', bg: '#bfdbfe', color: '#1e40af' },
+        'LATE': { label: 'SP', bg: '#818cf8', color: '#ffffff' },
+        'INTERMEDIATE': { label: 'ZS', bg: '#c084fc', color: '#ffffff' },
         'CLEAR': { label: '', bg: '', color: '' }
     };
 
@@ -217,7 +245,7 @@
     monthSelect.addEventListener('change', () => renderTabelle());
     yearSelect.addEventListener('change', () => renderTabelle());
 
-    // Berechnet die ISO-Kalenderwoche
+    // DIN ISO-8601 KW-Berechnung (Montag als 1. Tag der Woche)
     function getISOWeek(date) {
         const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
         const dayNum = d.getUTCDay() || 7;
@@ -230,7 +258,7 @@
         try {
             await supabaseClient.from('anwesenheiten').upsert({
                 id: 'planung',
-                eintraege: { eintraege: planungsDaten, mitarbeiter: MITARBEITER_LISTE, statusConfig: STATUS_CONFIG },
+                eintraege: { eintraege: planungsDaten },
                 updated_at: new Date().toISOString()
             });
         } catch (err) {
@@ -264,13 +292,13 @@
         let currentKW = null;
         let currentKwTh = null;
 
-        // 1. Header generieren (KW, Wochentag, Tag-Nummer)
+        // 1. Header (KW, Wochentag, Tag) aufbauen
         for (let d = 1; d <= daysInMonth; d++) {
             const dateObj = new Date(year, month, d);
             const dayOfWeek = dateObj.getDay(); 
-            const isSunday = (dayOfWeek === 0); // NUR Sonntag wird rot markiert
+            const isSunday = (dayOfWeek === 0); // EXKLUSIV nur Sonntag ist rosa!
 
-            // KW-Zeile gruppieren
+            // KW Zusammenfassung
             const kw = getISOWeek(dateObj);
             if (kw !== currentKW) {
                 currentKW = kw;
@@ -283,59 +311,72 @@
                 currentKwTh.colSpan += 1;
             }
 
-            // Wochentag Header (Sa, So, Mo...)
+            // Wochentag Header
             const thDay = document.createElement('th');
-            thDay.className = `header-day ${isSunday ? 'weekend' : ''}`;
+            thDay.className = `header-day ${isSunday ? 'is-sunday' : ''}`;
             thDay.textContent = dayNames[dayOfWeek];
             headerDays.appendChild(thDay);
 
-            // Datums-Header (1, 2, 3...)
+            // Datums-Nummer Header
             const thNum = document.createElement('th');
-            thNum.className = `header-num ${isSunday ? 'weekend' : ''}`;
+            thNum.className = `header-num ${isSunday ? 'is-sunday' : ''}`;
             thNum.textContent = d;
             headerDates.appendChild(thNum);
         }
 
-        // 2. Tabellenzellen für Mitarbeiter generieren
+        // 2. Tabellenzeilen gruppiert rendern
         tableBody.innerHTML = '';
-        MITARBEITER_LISTE.forEach(emp => {
-            const tr = document.createElement('tr');
+        
+        MITARBEITER_GROUPS.forEach(group => {
+            // Kategorie-Zeile (z.B. "Abteilungsleitung" / "Team")
+            const trCat = document.createElement('tr');
+            trCat.className = 'category-row';
+            const tdCat = document.createElement('td');
+            tdCat.colSpan = daysInMonth + 1;
+            tdCat.textContent = group.category;
+            trCat.appendChild(tdCat);
+            tableBody.appendChild(trCat);
 
-            const tdName = document.createElement('td');
-            tdName.className = 'col-sticky-1';
-            tdName.textContent = emp.name;
-            tr.appendChild(tdName);
+            // Mitarbeiter der Kategorie
+            group.members.forEach(emp => {
+                const tr = document.createElement('tr');
 
-            for (let d = 1; d <= daysInMonth; d++) {
-                const dateObj = new Date(year, month, d);
-                const isSunday = (dateObj.getDay() === 0); // NUR Sonntag ist rot
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const key = `${emp.id}_${dateStr}`;
+                const tdName = document.createElement('td');
+                tdName.className = 'col-sticky-1';
+                tdName.textContent = emp.name;
+                tr.appendChild(tdName);
 
-                const tdCell = document.createElement('td');
-                tdCell.className = `day-cell ${isSunday ? 'weekend' : ''}`;
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const dateObj = new Date(year, month, d);
+                    const isSunday = (dateObj.getDay() === 0); // Exklusiv nur Sonntag
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                    const key = `${emp.id}_${dateStr}`;
 
-                const statusVal = aktuellePlanungsDaten[key];
-                if (statusVal && STATUS_CONFIG[statusVal]) {
-                    const cfg = STATUS_CONFIG[statusVal];
-                    tdCell.textContent = cfg.label;
-                    tdCell.style.backgroundColor = cfg.bg;
-                    tdCell.style.color = cfg.color;
-                }
+                    const tdCell = document.createElement('td');
+                    tdCell.className = `day-cell ${isSunday ? 'is-sunday' : ''}`;
 
-                tdCell.addEventListener('click', () => {
-                    if (activeStatus === 'CLEAR') {
-                        delete aktuellePlanungsDaten[key];
-                    } else {
-                        aktuellePlanungsDaten[key] = activeStatus;
+                    const statusVal = aktuellePlanungsDaten[key];
+                    if (statusVal && STATUS_CONFIG[statusVal]) {
+                        const cfg = STATUS_CONFIG[statusVal];
+                        tdCell.textContent = cfg.label;
+                        tdCell.style.backgroundColor = cfg.bg;
+                        tdCell.style.color = cfg.color;
                     }
-                    renderTabelle();
-                    speichereDatenZentral(aktuellePlanungsDaten);
-                });
 
-                tr.appendChild(tdCell);
-            }
-            tableBody.appendChild(tr);
+                    tdCell.addEventListener('click', () => {
+                        if (activeStatus === 'CLEAR') {
+                            delete aktuellePlanungsDaten[key];
+                        } else {
+                            aktuellePlanungsDaten[key] = activeStatus;
+                        }
+                        renderTabelle();
+                        speichereDatenZentral(aktuellePlanungsDaten);
+                    });
+
+                    tr.appendChild(tdCell);
+                }
+                tableBody.appendChild(tr);
+            });
         });
     }
 
