@@ -297,8 +297,8 @@
         // 1. Kopfzeilen aufbauen
         for (let d = 1; d <= daysInMonth; d++) {
             const dateObj = new Date(year, month, d);
-            const dayOfWeek = dateObj.getDay(); 
-            const isSunday = (dayOfWeek === 0); // Ausschließliche Prüfung auf Sonntag
+            const dayOfWeek = dateObj.getDay();
+            const isSunday = dayOfWeek === 0;
 
             // KW-Balken dynamisch gruppieren
             const kw = getISOWeek(dateObj);
