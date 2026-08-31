@@ -116,12 +116,12 @@
             background-color: #ffffff !important;
         }
 
-        /* Ausschließlich Sonntage werden eingefärbt */
-        .is-sunday {
-            background-color: var(--sunday-bg) !important;
-            color: var(--sunday-text) !important;
+       /* Nur Sonntage markieren */
+        th.is-sunday,
+        td.is-sunday {
+        background-color: var(--sunday-bg);
+        color: var(--sunday-text);
         }
-
         .category-row td {
             background-color: #e2e8f0;
             font-weight: bold;
