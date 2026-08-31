@@ -429,10 +429,10 @@
             .subscribe();
     }
 
-    // ==========================================
+ // ==========================================
     // C. RENDER-FUNKTION FÜR DIE TABELLE
     // ==========================================
-    function renderTabelle(eintraege = {}) {
+    function renderTabelle(eintraege = einfachePlanungsDaten || aktuellePlanungsDaten) {
         const year = parseInt(yearSelect.value);
         const month = parseInt(monthSelect.value);
         const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -446,7 +446,8 @@
         for (let d = 1; d <= daysInMonth; d++) {
             const dateObj = new Date(year, month, d);
             const dayOfWeek = dateObj.getDay();
-            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+            // Nur Sonntag (0) gilt als rotes Wochenende, Samstag (6) ist normaler Arbeitstag
+            const isWeekend = dayOfWeek === 0;
 
             const thDay = document.createElement('th');
             thDay.className = `header-day ${isWeekend ? 'weekend' : ''}`;
@@ -475,7 +476,8 @@
                 const key = `${emp.id}_${dateStr}`;
 
                 const dateObj = new Date(year, month, d);
-                const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+                // Nur Sonntag (0) gilt als rotes Wochenende
+                const isWeekend = dateObj.getDay() === 0;
 
                 const tdCell = document.createElement('td');
                 tdCell.className = `day-cell ${isWeekend ? 'weekend' : ''}`;
