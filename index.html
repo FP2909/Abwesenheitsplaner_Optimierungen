@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0050aa">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Anwesenheitsplaner">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>An-/Abwesenheitsplaner (6-Tage-Woche)</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --primary: #1e293b;
+            --border-color: #cbd5e1;
+            /* Für 6-Tage-Woche angepasst */
+            --saturday-bg: #e0f2fe;   /* Dezentes Blau für Samstags-Arbeitstag */
+            --saturday-text: #0369a1;
+            --sunday-bg: #fee2e2;     /* Rot nur für Sonntag (Wochenende) */
+            --sunday-text: #991b1b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: #334155;
+            margin: 0;
+            padding: 15px;
+        }
+
+        /* Kopfbereich in einer Zeile */
+        .site-header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            background: var(--card-bg);
+            padding: 20px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
+        .header-title-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title-container h1 {
+            font-size: 20px;
+            margin: 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .header-title-container .user-info {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: normal;
+        }
+
+        .header-brand-container {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-brand-container img {
+            height: 42px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .header-brand-container .company-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Top Bar Layout */
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: var(--card-bg);
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .date-selectors {
+            display: flex;
+            flex: 0 0 auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        select, input[type="text"] {
+            padding: 6px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .action-buttons-container {
+            margin-left: 0px;
+            flex: 0 0 auto;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            background: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            transition: background 0.15s ease;
+        }
+        .btn-action:hover { background: #0369a1; }
+
+        .btn-secondary { background: #64748b; }
+        .btn-secondary:hover { background: #475569; }
+
+        .btn-print { background: #0f766e; }
+        .btn-print:hover { background: #115e59; }
+
+        .btn-danger { background: #ef4444; }
+        .btn-danger:hover { background: #dc2626; }
+
+        /* Status-Buttons Toolbar */
+        .status-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 10px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
+        .status-btn {
+            padding: 6px 12px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .status-btn.active {
+            border-color: #000;
+            transform: scale(1.04);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 650px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .cat-item, .emp-item, .btn-item {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .cat-item input[type="text"], .emp-item input[type="text"], .btn-item input[type="text"] { flex: 1; }
+        .cat-item input[type="color"] { border: none; width: 32px; height: 32px; cursor: pointer; padding: 0; background: none; }
+
+        .btn-move {
+            padding: 4px 8px;
+            background: #e2e8f0;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-move:hover:not(:disabled) { background: #cbd5e1; }
+        .btn-move:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Main Table Layout */
+        .table-container {
+            max-height: 68vh;
+            overflow: auto;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            font-size: 12px;
+            user-select: none;
+        }
+
+        th, td {
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+            padding: 0;
+            white-space: nowrap;
+        }
+
+        /* Sticky Columns & Headers */
+        thead tr:nth-child(1) th { position: sticky; top: 0; z-index: 10; }
+        thead tr:nth-child(2) th { position: sticky; top: 25px; z-index: 10; }
+        thead tr:nth-child(3) th { position: sticky; top: 48px; z-index: 10; }
+
+        th.col-sticky-1, td.col-sticky-1 {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background: #f8fafc;
+            width: 150px;
+            min-width: 150px;
+            max-width: 150px;
+            text-align: left;
+            padding-left: 8px;
+            font-weight: 600;
+        }
+
+        th.col-sticky-2, td.col-sticky-2 {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background: #f8fafc;
+            display:none; width:0;
+            min-width:0;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        thead tr th.col-sticky-1, thead tr th.col-sticky-2 {
+            z-index: 15;
+            background: #e2e8f0;
+        }
+
+        /* Header Styling */
+        th.header-kw { background: #cbd5e1; color: #1e293b; font-weight: 700; height: 24px; font-size: 11px; }
+        th.header-day { background: #f1f5f9; height: 22px; font-weight: 500; font-size: 11px; }
+        th.header-num { background: #e2e8f0; height: 22px; font-weight: 700; }
+
+        /* Day Cells */
+        td.day-cell {
+            width: 26px;
+            min-width: 26px;
+            height: 56px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 11px;
+            transition: background 0.1s;
+        }
+
+        tbody tr td { height:56px; }
+        td.day-cell:hover {
+            outline: 2px solid #0284c7;
+            z-index: 2;
+        }
+
+        /* 6-Tage-Woche Klassen */
+        .saturday {
+            background-color: var(--saturday-bg) !important;
+            color: var(--saturday-text);
+        }
+
+        .sunday {
+            background-color: var(--sunday-bg) !important;
+            color: var(--sunday-text);
+        }
+
+        /* Feiertage */
+        .holiday {
+            color: #92400e !important;
+            font-weight: 700;
+        }
+
+        th.holiday {
+            background-color: #fde68a !important;
+        }
+
+        td.day-cell.holiday {
+            background-color: #fde68a;
+            background-image: linear-gradient(rgba(253, 230, 138, 0.58), rgba(253, 230, 138, 0.58));
+            background-blend-mode: multiply;
+        }
+
+        td.day-cell.holiday:hover {
+            outline: 2px solid #d97706;
+        }
+
+        .dept-header-row td {
+            background: #e2e8f0;
+            font-weight: 700;
+            text-align: left;
+            padding-left: 10px;
+            color: #1e293b;
+            height: 26px;
+            font-size: 12px;
+        }
+
+        /* Summary Col */
+        th.col-summary, td.col-summary {
+            width: 45px;
+            min-width: 45px;
+            background: #f1f5f9;
+            font-size: 11px;
+        }
+
+        .legend {
+            margin-top: 10px;
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #64748b;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-box {
+            width: 14px;
+            height: 14px;
+            border-radius: 2px;
+            display: inline-block;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background-color: #fff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                font-size: 10pt;
+            }
+            .top-bar, .status-toolbar, .btn-action, .modal, .legend {
+                display: none !important;
+            }
+            .site-header {
+                box-shadow: none !important;
+                padding: 10px 0 !important;
+                margin-bottom: 10px !important;
+            }
+            .table-container {
+                max-height: none !important;
+                overflow: visible !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            table {
+                width: 100% !important;
+                page-break-inside: auto;
+            }
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+            th, td {
+                border: 1px solid #94a3b8 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            th.col-sticky-1, td.col-sticky-1, th.col-sticky-2, td.col-sticky-2 {
+                position: static !important;
+            }
+            @page {
+                size: A4 landscape;
+                margin: 1cm;
+            }
+        }
+
+        /* ===== MOBILE / PWA ===== */
+        html, body { min-height: 100%; }
+        body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+        button, select, input { touch-action: manipulation; }
+        .install-app-btn { display:none; }
+        @media (max-width: 700px) {
+            body { padding: 6px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+            .site-header { padding: 10px 8px; margin-bottom: 7px; border-radius: 7px; gap: 8px; }
+            .header-title-container { gap: 6px; min-width: 0; }
+            .header-title-container h1 { font-size: 15px; white-space: nowrap; }
+            .header-title-container > span:first-child { font-size: 18px !important; }
+            .header-brand-container { gap: 5px; min-width: 0; }
+            .header-brand-container img { height: 30px; max-width: 125px; }
+            .header-brand-container .company-title { display:none; }
+            .top-bar { padding: 7px 8px; gap: 7px; margin-bottom: 7px; align-items: stretch; }
+            .date-selectors { gap: 6px; flex: 1 1 100%; justify-content: flex-start; }
+            .date-selectors label { font-size: 12px; flex:1; }
+            .date-selectors input, .date-selectors select { width: 100% !important; box-sizing: border-box; min-height: 34px; font-size: 14px; }
+            .action-buttons-container { flex: 1 1 100%; display:flex; flex-wrap: nowrap; overflow-x:auto; padding-bottom: 2px; scrollbar-width:none; }
+            .action-buttons-container::-webkit-scrollbar { display:none; }
+            .action-buttons-container button { flex: 0 0 auto; min-height: 36px; font-size: 12px; padding: 7px 10px; }
+            .status-toolbar { padding: 7px 8px; margin-bottom: 7px; gap: 6px; overflow-x:auto; flex-wrap: nowrap; scrollbar-width:none; }
+            .status-toolbar::-webkit-scrollbar { display:none; }
+            .status-toolbar > span { flex:0 0 auto; font-size: 11px; }
+            .status-btn { flex:0 0 auto; min-height: 34px; padding: 6px 9px; font-size: 11px; }
+            .table-container { max-height: calc(100vh - 190px); min-height: 45vh; border-radius: 6px; -webkit-overflow-scrolling: touch; }
+            table { width: max-content; min-width: 100%; font-size: 11px; }
+            th.col-sticky-1, td.col-sticky-1 { width: 125px; min-width:125px; max-width:125px; }
+            td.day-cell { width: 29px; min-width:29px; height: 64px; font-size: 11px; }
+            th.header-day, th.header-num, th.header-kw { font-size: 10px; }
+            .legend { margin: 7px 3px 0; gap: 8px; font-size: 10px; }
+            footer { margin-top: 10px; padding-top: 8px; font-size: 9px; flex-direction:column; gap:3px; text-align:center; }
+            .modal-content { width: calc(100% - 18px); max-width:none; max-height: 88vh; padding: 12px; box-sizing:border-box; }
+            .cat-item, .emp-item, .btn-item { flex-wrap: wrap; }
+            .cat-item input[type="text"]:nth-of-type(2), .emp-item input[type="text"] { min-width: 150px; }
+            .install-app-btn { display:inline-flex; align-items:center; justify-content:center; }
+        }
+        @media (display-mode: standalone) {
+            body { padding-top: max(6px, env(safe-area-inset-top)); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header class="site-header">
+        <div class="header-title-container">
+            <span style="font-size: 22px;">📅</span>
+            <h1>An-/Abwesenheitsplaner (6-Tage-Woche)</h1>
+            <span class="user-info"></span>
+        </div>
+    </header>
+
+    <div class="top-bar">
+        <div class="date-selectors">
+            <label for="monthSelect">Monat:</label>
+            <select id="monthSelect" onchange="renderTable()"></select>
+            <label for="yearSelect">Jahr:</label>
+            <select id="yearSelect" onchange="renderTable()"></select>
+        </div>
+        <div class="action-buttons-container">
+            <button class="btn-action" onclick="openEmpModal()">Mitarbeiter verwalten</button>
+            <button class="btn-action btn-secondary" onclick="openStatusModal()">Status-Typen verwalten</button>
+            <button class="btn-action btn-print" onclick="window.print()">Drucken</button>
+        </div>
+    </div>
+
+    <div class="status-toolbar" id="statusToolbar">
+        <span style="font-weight: 600; font-size: 12px;">Status auswählen:</span>
+    </div>
+
+    <div class="table-container">
+        <table id="attendanceTable">
+            <thead>
+                <tr id="trKW"></tr>
+                <tr id="trDayName"></tr>
+                <tr id="trDayNum"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><span class="legend-box" style="background: var(--saturday-bg); border:1px solid #0369a1;"></span> Samstag (Werktag)</div>
+        <div class="legend-item"><span class="legend-box" style="background: var(--sunday-bg); border:1px solid #991b1b;"></span> Sonntag (Wochenende)</div>
+        <div class="legend-item"><span class="legend-box" style="background: #fde68a; border:1px solid #d97706;"></span> Feiertag</div>
+    </div>
+
+    <footer>
+        <span>An-/Abwesenheitsplaner &copy; 6-Tage-Woche Modus</span>
+    </footer>
+</div>
+
+<!-- Modal: Mitarbeiter -->
+<div class="modal" id="empModal">
+    <div class="modal-content">
+        <div class="modal-header"><h3>Mitarbeiter verwalten</h3></div>
+        <div id="empList"></div>
+        <br>
+        <button class="btn-action" onclick="addEmployee()">+ Mitarbeiter hinzufügen</button>
+        <button class="btn-action btn-secondary" onclick="closeEmpModal()">Schließen & Speichern</button>
+    </div>
+</div>
+
+<!-- Modal: Status-Typen -->
+<div class="modal" id="statusModal">
+    <div class="modal-content">
+        <div class="modal-header"><h3>Status-Typen verwalten</h3></div>
+        <div id="statusList"></div>
+        <br>
+        <button class="btn-action" onclick="addStatusType()">+ Status hinzufügen</button>
+        <button class="btn-action btn-secondary" onclick="closeStatusModal()">Schließen & Speichern</button>
+    </div>
+</div>
+
+<script>
+    // Standarddaten
+    let employees = JSON.parse(localStorage.getItem('planer_employees')) || [
+        { id: 1, name: "Max Mustermann", dept: "Vertrieb" },
+        { id: 2, name: "Erika Musterfrau", dept: "Vertrieb" },
+        { id: 3, name: "Peter Müller", dept: "Technik" }
+    ];
+
+    let statusTypes = JSON.parse(localStorage.getItem('planer_status_types')) || [
+        { id: "U", name: "Urlaub", color: "#86efac", code: "U" },
+        { id: "K", name: "Krank", color: "#fca5a5", code: "K" },
+        { id: "HO", name: "HomeOffice", color: "#93c5fd", code: "HO" },
+        { id: "S", name: "Schulung", color: "#fde047", code: "S" },
+        { id: "CLR", name: "Löschen", color: "#ffffff", code: "" }
+    ];
+
+    let attendanceData = JSON.parse(localStorage.getItem('planer_attendance_data')) || {};
+    let selectedStatus = statusTypes[0].code;
+
+    const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+
+    function init() {
+        const now = new Date();
+        const mSelect = document.getElementById('monthSelect');
+        const ySelect = document.getElementById('yearSelect');
+
+        months.forEach((m, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = m;
+            if (idx === now.getMonth()) opt.selected = true;
+            mSelect.appendChild(opt);
+        });
+
+        for (let y = now.getFullYear() - 2; y <= now.getFullYear() + 3; y++) {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            if (y === now.getFullYear()) opt.selected = true;
+            ySelect.appendChild(opt);
+        }
+
+        renderStatusToolbar();
+        renderTable();
+    }
+
+    function renderStatusToolbar() {
+        const tb = document.getElementById('statusToolbar');
+        tb.innerHTML = '<span style="font-weight: 600; font-size: 12px;">Status auswählen:</span>';
+        statusTypes.forEach(st => {
+            const btn = document.createElement('button');
+            btn.className = 'status-btn' + (selectedStatus === st.code ? ' active' : '');
+            btn.style.backgroundColor = st.color;
+            btn.textContent = st.name + (st.code ? ` (${st.code})` : '');
+            btn.onclick = () => {
+                selectedStatus = st.code;
+                document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            };
+            tb.appendChild(btn);
+        });
+    }
+
+    // DIN Kalenderwoche berechnen
+    function getKW(d) {
+        const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+        const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+        return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    }
+
+    function renderTable() {
+        const month = parseInt(document.getElementById('monthSelect').value);
+        const year = parseInt(document.getElementById('yearSelect').value);
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const trKW = document.getElementById('trKW');
+        const trDayName = document.getElementById('trDayName');
+        const trDayNum = document.getElementById('trDayNum');
+        const tbody = document.getElementById('tableBody');
+
+        trKW.innerHTML = '<th class="col-sticky-1">KW</th>';
+        trDayName.innerHTML = '<th class="col-sticky-1">Tag</th>';
+        trDayNum.innerHTML = '<th class="col-sticky-1">Mitarbeiter</th>';
+
+        let currentKW = -1;
+        let kwSpan = 0;
+        let lastKwTh = null;
+
+        const dayNames = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const date = new Date(year, month, d);
+            const dayOfWeek = date.getDay(); // 0 = So, 6 = Sa
+            const kw = getKW(date);
+
+            // KW Header
+            if (kw !== currentKW) {
+                currentKW = kw;
+                kwSpan = 1;
+                lastKwTh = document.createElement('th');
+                lastKwTh.className = 'header-kw';
+                lastKwTh.textContent = 'KW ' + kw;
+                trKW.appendChild(lastKwTh);
+            } else {
+                kwSpan++;
+                if (lastKwTh) lastKwTh.colSpan = kwSpan;
+            }
+
+            // Tag Name Header
+            const thName = document.createElement('th');
+            thName.className = 'header-day';
+            if (dayOfWeek === 6) thName.classList.add('saturday'); // Sa
+            if (dayOfWeek === 0) thName.classList.add('sunday');   // So
+            thName.textContent = dayNames[dayOfWeek];
+            trDayName.appendChild(thName);
+
+            // Tag Nummer Header
+            const thNum = document.createElement('th');
+            thNum.className = 'header-num';
+            if (dayOfWeek === 6) thNum.classList.add('saturday');
+            if (dayOfWeek === 0) thNum.classList.add('sunday');
+            thNum.textContent = d;
+            trDayNum.appendChild(thNum);
+        }
+
+        // Body Rendern (Mitarbeiter & Tage)
+        tbody.innerHTML = '';
+        
+        // Nach Abteilung gruppieren
+        const depts = [...new Set(employees.map(e => e.dept || "Allgemein"))];
+
+        depts.forEach(dept => {
+            // Abteilungs-Header Zeile
+            const deptRow = document.createElement('tr');
+            deptRow.className = 'dept-header-row';
+            const deptTd = document.createElement('td');
+            deptTd.colSpan = daysInMonth + 1;
+            deptTd.textContent = dept;
+            deptRow.appendChild(deptTd);
+            tbody.appendChild(deptRow);
+
+            const deptEmps = employees.filter(e => (e.dept || "Allgemein") === dept);
+
+            deptEmps.forEach(emp => {
+                const tr = document.createElement('tr');
+                
+                // Name Spalte
+                const tdName = document.createElement('td');
+                tdName.className = 'col-sticky-1';
+                tdName.textContent = emp.name;
+                tr.appendChild(tdName);
+
+                // Tage Spalten
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const date = new Date(year, month, d);
+                    const dayOfWeek = date.getDay();
+                    const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+
+                    const tdDay = document.createElement('td');
+                    tdDay.className = 'day-cell';
+                    
+                    if (dayOfWeek === 6) tdDay.classList.add('saturday'); // Samstag ist ein regulärer Tag!
+                    if (dayOfWeek === 0) tdDay.classList.add('sunday');   // Sonntag ist Ruhetag
+
+                    // Eingetragenen Wert laden
+                    const val = (attendanceData[emp.id] && attendanceData[emp.id][dateKey]) || '';
+                    if (val) {
+                        tdDay.textContent = val;
+                        const st = statusTypes.find(s => s.code === val);
+                        if (st) tdDay.style.backgroundColor = st.color;
+                    }
+
+                    // Klick-Event für Zellbearbeitung (nur Sonntage blockieren oder alle Tage erlauben)
+                    tdDay.onclick = () => {
+                        if (dayOfWeek === 0) return; // Sonntags keine Arbeitseinträge in der Regel
+                        
+                        if (!attendanceData[emp.id]) attendanceData[emp.id] = {};
+                        
+                        if (selectedStatus === '') {
+                            delete attendanceData[emp.id][dateKey];
+                            tdDay.textContent = '';
+                            tdDay.style.backgroundColor = dayOfWeek === 6 ? 'var(--saturday-bg)' : '';
+                        } else {
+                            attendanceData[emp.id][dateKey] = selectedStatus;
+                            tdDay.textContent = selectedStatus;
+                            const st = statusTypes.find(s => s.code === selectedStatus);
+                            if (st) tdDay.style.backgroundColor = st.color;
+                        }
+
+                        localStorage.setItem('planer_attendance_data', JSON.stringify(attendanceData));
+                    };
+
+                    tr.appendChild(tdDay);
+                }
+
+                tbody.appendChild(tr);
+            });
+        });
+    }
+
+    /* Modal-Funktionen für Mitarbeiter & Status-Verwaltung */
+    function openEmpModal() {
+        const list = document.getElementById('empList');
+        list.innerHTML = '';
+        employees.forEach((e, idx) => {
+            list.innerHTML += `
+                <div class="emp-item">
+                    <input type="text" value="${e.name}" onchange="employees[${idx}].name=this.value">
+                    <input type="text" placeholder="Abteilung" value="${e.dept || ''}" onchange="employees[${idx}].dept=this.value">
+                    <button class="btn-action btn-danger" onclick="deleteEmp(${idx})">🗑️</button>
+                </div>
+            `;
+        });
+        document.getElementById('empModal').style.display = 'flex';
+    }
+
+    function closeEmpModal() {
+        localStorage.setItem('planer_employees', JSON.stringify(employees));
+        document.getElementById('empModal').style.display = 'none';
+        renderTable();
+    }
+
+    function addEmployee() {
+        employees.push({ id: Date.now(), name: "Neuer Mitarbeiter", dept: "Vertrieb" });
+        openEmpModal();
+    }
+
+    function deleteEmp(idx) {
+        employees.splice(idx, 1);
+        openEmpModal();
+    }
+
+    function openStatusModal() {
+        const list = document.getElementById('statusList');
+        list.innerHTML = '';
+        statusTypes.forEach((st, idx) => {
+            if(st.id === 'CLR') return;
+            list.innerHTML += `
+                <div class="cat-item">
+                    <input type="text" value="${st.name}" onchange="statusTypes[${idx}].name=this.value">
+                    <input type="text" style="width:50px;" value="${st.code}" onchange="statusTypes[${idx}].code=this.value">
+                    <input type="color" value="${st.color}" onchange="statusTypes[${idx}].color=this.value">
+                </div>
+            `;
+        });
+        document.getElementById('statusModal').style.display = 'flex';
+    }
+
+    function closeStatusModal() {
+        localStorage.setItem('planer_status_types', JSON.stringify(statusTypes));
+        document.getElementById('statusModal').style.display = 'none';
+        renderStatusToolbar();
+        renderTable();
+    }
+
+    function addStatusType() {
+        statusTypes.splice(statusTypes.length - 1, 0, { id: 'custom_' + Date.now(), name: "Neuer Status", color: "#e2e8f0", code: "X" });
+        openStatusModal();
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
