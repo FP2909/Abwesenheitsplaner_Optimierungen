@@ -425,15 +425,26 @@
 
         /* Footer Style */
         footer {
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            font-size: 11px;
-            color: #64748b;
-        }
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.footer-left {
+    text-align: left;
+}
+
+.footer-right {
+    text-align: right;
+    margin-left: auto;
+}
 
         /* ===== MOBILE / PWA ===== */
         html, body { min-height: 100%; }
