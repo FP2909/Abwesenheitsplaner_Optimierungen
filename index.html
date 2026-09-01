@@ -30,16 +30,18 @@
         }
 
         /* Kopfbereich in einer Zeile */
-        .site-header {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            background: var(--card-bg);
-            padding: 20px 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 15px;
-        }
+       .site-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--card-bg);
+    padding: 20px 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 15px;
+}
 
         .header-title-container {
             display: flex;
@@ -64,6 +66,7 @@
             display: flex;
             align-items: center;
             gap: 14px;
+            margin-left: auto !important; /* Drückt Logo + Text ganz nach rechts */
         }
 
         .header-brand-container img {
