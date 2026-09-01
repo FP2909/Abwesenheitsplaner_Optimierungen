@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0050aa">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Anwesenheitsplaner">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <title>An-/Abwesenheitsplaner</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --primary: #1e293b;
+            --border-color: #cbd5e1;
+            --weekend-bg: #fee2e2;
+            --weekend-text: #991b1b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: #334155;
+            margin: 0;
+            padding: 15px;
+        }
+
+        /* Kopfbereich in einer Zeile */
+        .site-header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            background: var(--card-bg);
+            padding: 20px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
+        .header-title-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title-container h1 {
+            font-size: 20px;
+            margin: 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .header-title-container .user-info {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: normal;
+        }
+
+        .header-brand-container {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-left: auto;
+        }
+
+        .header-brand-container img {
+            height: 42px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .header-brand-container .company-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Top Bar Layout */
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: var(--card-bg);
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .date-selectors {
+            display: flex;
+            flex: 0 0 auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        select, input[type="text"] {
+            padding: 6px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .action-buttons-container {
+            margin-left: 0px;
+            flex: 0 0 auto;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            background: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            transition: background 0.15s ease;
+        }
+        .btn-action:hover { background: #0369a1; }
+
+        .btn-secondary { background: #64748b; }
+        .btn-secondary:hover { background: #475569; }
+
+        .btn-print { background: #0f766e; }
+        .btn-print:hover { background: #115e59; }
+
+        .btn-danger { background: #ef4444; }
+        .btn-danger:hover { background: #dc2626; }
+
+        /* Status-Buttons Toolbar */
+        .status-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 10px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
+        .status-btn {
+            padding: 6px 12px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .status-btn.active {
+            border-color: #000;
+            transform: scale(1.04);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 650px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .cat-item, .emp-item {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .cat-item input[type="text"], .emp-item input[type="text"] { flex: 1; }
+        .cat-item input[type="color"] { border: none; width: 32px; height: 32px; cursor: pointer; padding: 0; background: none; }
+
+        .btn-move {
+            padding: 4px 8px;
+            background: #e2e8f0;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-move:hover:not(:disabled) { background: #cbd5e1; }
+        .btn-move:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Main Table Layout */
+        .table-container {
+            max-height: 68vh;
+            overflow: auto;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            font-size: 12px;
+            user-select: none;
+        }
+
+        th, td {
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+            padding: 0;
+            white-space: nowrap;
+        }
+
+        /* Sticky Columns & Headers */
+        thead tr:nth-child(1) th { position: sticky; top: 0; z-index: 10; }
+        thead tr:nth-child(2) th { position: sticky; top: 24px; z-index: 10; }
+        thead tr:nth-child(3) th { position: sticky; top: 46px; z-index: 10; }
+
+        th.col-sticky-1, td.col-sticky-1 {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background: #f8fafc;
+            width: 150px;
+            min-width: 150px;
+            max-width: 150px;
+            text-align: left;
+            padding-left: 8px;
+            font-weight: 600;
+        }
+
+        thead tr th.col-sticky-1 {
+            z-index: 15;
+            background: #e2e8f0;
+        }
+
+        /* Header Styling */
+        th.header-kw { background: #cbd5e1; color: #1e293b; font-weight: 700; height: 24px; font-size: 11px; }
+        th.header-day { background: #f1f5f9; height: 22px; font-weight: 500; font-size: 11px; }
+        th.header-num { background: #e2e8f0; height: 22px; font-weight: 700; }
+
+        /* Day Cells */
+        td.day-cell {
+            width: 26px;
+            min-width: 26px;
+            height: 36px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 11px;
+            transition: background 0.1s;
+        }
+
+        tbody tr td { height: 36px; }
+        td.day-cell:hover {
+            outline: 2px solid #0284c7;
+            z-index: 2;
+        }
+
+        .weekend {
+            background-color: var(--weekend-bg) !important;
+            color: var(--weekend-text);
+        }
+
+        /* Feiertage: komplette Spalte sichtbar */
+        .holiday {
+            color: #92400e !important;
+            font-weight: 700;
+        }
+
+        th.holiday {
+            background-color: #fde68a !important;
+        }
+
+        td.day-cell.holiday {
+            background-color: #fde68a;
+            background-image: linear-gradient(rgba(253, 230, 138, 0.58), rgba(253, 230, 138, 0.58));
+            background-blend-mode: multiply;
+        }
+
+        td.day-cell.holiday:hover {
+            outline: 2px solid #d97706;
+        }
+
+        .dept-header-row td {
+            background: #e2e8f0;
+            font-weight: 700;
+            text-align: left;
+            padding-left: 10px;
+            color: #1e293b;
+            height: 26px;
+            font-size: 12px;
+        }
+
+        /* Summary Col */
+        th.col-summary, td.col-summary {
+            width: 45px;
+            min-width: 45px;
+            background: #f1f5f9;
+            font-size: 11px;
+        }
+
+        .legend {
+            margin-top: 10px;
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #64748b;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-box {
+            width: 14px;
+            height: 14px;
+            border-radius: 2px;
+            display: inline-block;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background-color: #fff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                font-size: 10pt;
+            }
+            .top-bar, .status-toolbar, .btn-action, .modal, .legend {
+                display: none !important;
+            }
+            .site-header {
+                box-shadow: none !important;
+                padding: 10px 0 !important;
+                margin-bottom: 10px !important;
+            }
+            .table-container {
+                max-height: none !important;
+                overflow: visible !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            table {
+                width: 100% !important;
+                page-break-inside: auto;
+            }
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+            th, td {
+                border: 1px solid #94a3b8 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            th.col-sticky-1, td.col-sticky-1 {
+                position: static !important;
+            }
+            @page {
+                size: A4 landscape;
+                margin: 1cm;
+            }
+        }
+
+        /* Mobile / PWA Styles */
+        html, body { min-height: 100%; }
+        body { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+        button, select, input { touch-action: manipulation; }
+        
+        @media (max-width: 700px) {
+            body { padding: 6px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+            .site-header { padding: 10px 8px; margin-bottom: 7px; border-radius: 7px; gap: 8px; }
+            .header-title-container { gap: 6px; min-width: 0; }
+            .header-title-container h1 { font-size: 15px; white-space: nowrap; }
+            .header-brand-container img { height: 30px; max-width: 125px; }
+            .header-brand-container .company-title { display:none; }
+            .top-bar { padding: 7px 8px; gap: 7px; margin-bottom: 7px; align-items: stretch; }
+            .date-selectors { gap: 6px; flex: 1 1 100%; justify-content: flex-start; }
+            .date-selectors label { font-size: 12px; flex:1; }
+            .date-selectors input, .date-selectors select { width: 100% !important; box-sizing: border-box; min-height: 34px; font-size: 14px; }
+            .action-buttons-container { flex: 1 1 100%; display:flex; flex-wrap: nowrap; overflow-x:auto; padding-bottom: 2px; scrollbar-width:none; }
+            .action-buttons-container::-webkit-scrollbar { display:none; }
+            .action-buttons-container button { flex: 0 0 auto; min-height: 36px; font-size: 12px; padding: 7px 10px; }
+            .status-toolbar { padding: 7px 8px; margin-bottom: 7px; gap: 6px; overflow-x:auto; flex-wrap: nowrap; scrollbar-width:none; }
+            .status-toolbar::-webkit-scrollbar { display:none; }
+            .status-toolbar > span { flex:0 0 auto; font-size: 11px; }
+            .status-btn { flex:0 0 auto; min-height: 34px; padding: 6px 9px; font-size: 11px; }
+            .table-container { max-height: calc(100vh - 190px); min-height: 45vh; border-radius: 6px; -webkit-overflow-scrolling: touch; }
+            table { width: max-content; min-width: 100%; font-size: 11px; }
+            th.col-sticky-1, td.col-sticky-1 { width: 125px; min-width:125px; max-width:125px; }
+            td.day-cell { width: 29px; min-width:29px; height: 44px; font-size: 11px; }
+            th.header-day, th.header-num, th.header-kw { font-size: 10px; }
+            .legend { margin: 7px 3px 0; gap: 8px; font-size: 10px; }
+            footer { margin-top: 10px; padding-top: 8px; font-size: 9px; flex-direction:column; gap:3px; text-align:center; }
+            .modal-content { width: calc(100% - 18px); max-width:none; max-height: 88vh; padding: 12px; box-sizing:border-box; }
+            .cat-item, .emp-item { flex-wrap: wrap; }
+        }
+        @media (display-mode: standalone) {
+            body { padding-top: max(6px, env(safe-area-inset-top)); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header class="site-header">
+        <div class="header-title-container">
+            <span style="font-size: 22px;">📅</span>
+            <h1>An-/Abwesenheitsplaner</h1>
+            <span class="user-info"></span>
+        </div>
+        <div class="header-brand-container">
+            <span class="company-title">MEINE FIRMA</span>
+        </div>
+    </header>
+
+    <div class="top-bar">
+        <div class="date-selectors">
+            <label for="month-select">Monat:</label>
+            <select id="month-select">
+                <option value="0">Januar</option>
+                <option value="1">Februar</option>
+                <option value="2">März</option>
+                <option value="3">April</option>
+                <option value="4">Mai</option>
+                <option value="5">Juni</option>
+                <option value="6">Juli</option>
+                <option value="7">August</option>
+                <option value="8">September</option>
+                <option value="9">Oktober</option>
+                <option value="10">November</option>
+                <option value="11">Dezember</option>
+            </select>
+            <label for="year-select">Jahr:</label>
+            <select id="year-select"></select>
+        </div>
+        <div class="action-buttons-container">
+            <button class="btn-action" onclick="openModal('employee-modal')">Mitarbeiter verwalten</button>
+            <button class="btn-action btn-secondary" onclick="openModal('category-modal')">Kategorien verwalten</button>
+            <button class="btn-action btn-print" onclick="window.print()">Drucken</button>
+            <button class="btn-action btn-danger" onclick="clearCurrentMonth()">Monat leeren</button>
+        </div>
+    </div>
+
+    <div class="status-toolbar" id="status-toolbar">
+        <span style="font-weight:600; font-size:12px; margin-right:5px;">Status auswählen:</span>
+    </div>
+
+    <div class="table-container">
+        <table id="planner-table">
+            <thead>
+                <tr id="header-kw-row">
+                    <th class="col-sticky-1">KW</th>
+                </tr>
+                <tr id="header-day-row">
+                    <th class="col-sticky-1">Tag</th>
+                </tr>
+                <tr id="header-num-row">
+                    <th class="col-sticky-1">Mitarbeiter</th>
+                </tr>
+            </thead>
+            <tbody id="planner-tbody">
+            </tbody>
+        </table>
+    </div>
+
+    <div class="legend" id="legend-container">
+    </div>
+
+    <footer>
+        An-/Abwesenheitsplaner &copy; <span id="current-year"></span>
+    </footer>
+
+</div>
+
+<!-- Modal: Employee Management -->
+<div class="modal" id="employee-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 style="margin:0; font-size:16px;">Mitarbeiter &amp; Abteilungen verwalten</h2>
+        </div>
+        <div id="employee-list-container"></div>
+        <div style="margin-top:15px; display:flex; gap:10px; justify-content:flex-end;">
+            <button class="btn-action" onclick="addEmployeeRow()">Mitarbeiter hinzufügen</button>
+            <button class="btn-action btn-secondary" onclick="addDepartmentRow()">Abteilung hinzufügen</button>
+            <button class="btn-action btn-print" onclick="saveEmployees()">Speichern &amp; Schließen</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Category Management -->
+<div class="modal" id="category-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 style="margin:0; font-size:16px;">Kategorien / Status verwalten</h2>
+        </div>
+        <div id="category-list-container"></div>
+        <div style="margin-top:15px; display:flex; gap:10px; justify-content:flex-end;">
+            <button class="btn-action" onclick="addCategoryRow()">Kategorie hinzufügen</button>
+            <button class="btn-action btn-print" onclick="saveCategories()">Speichern &amp; Schließen</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- State Management ---
+    const DEFAULT_CATEGORIES = [
+        { id: 'anwesend', label: 'Anwesend', code: 'A', color: '#bbf7d0', textColor: '#166534' },
+        { id: 'urlaub', label: 'Urlaub', code: 'U', color: '#bfdbfe', textColor: '#1e40af' },
+        { id: 'krank', label: 'Krank', code: 'K', color: '#fecaca', textColor: '#991b1b' },
+        { id: 'homeoffice', label: 'Homeoffice', code: 'HO', color: '#e9d5ff', textColor: '#6b21a8' },
+        { id: 'schulung', label: 'Schulung', code: 'S', color: '#fef08a', textColor: '#854d0e' },
+        { id: 'frei', label: 'Zeitausgleich', code: 'ZA', color: '#e2e8f0', textColor: '#334155' }
+    ];
+
+    const DEFAULT_STRUCTURE = [
+        { type: 'dept', name: 'Geschäftsleitung' },
+        { type: 'emp', name: 'Max Mustermann' },
+        { type: 'emp', name: 'Erika Mustermann' },
+        { type: 'dept', name: 'Entwicklung' },
+        { type: 'emp', name: 'John Doe' },
+        { type: 'emp', name: 'Jane Doe' }
+    ];
+
+    let categories = JSON.parse(localStorage.getItem('planner_categories')) || DEFAULT_CATEGORIES;
+    let structure = JSON.parse(localStorage.getItem('planner_structure')) || DEFAULT_STRUCTURE;
+    let attendanceData = JSON.parse(localStorage.getItem('planner_data')) || {};
+
+    let selectedYear = new Date().getFullYear();
+    let selectedMonth = new Date().getMonth();
+    let activeStatusId = categories[0] ? categories[0].id : null;
+    let isMouseDown = false;
+
+    // Temporary storage for modals
+    let tempStructure = [];
+    let tempCategories = [];
+
+    // --- German Holidays Helper (Baden-Württemberg / General DE) ---
+    function getGermanHolidays(year) {
+        const holidays = {};
+
+        function addHoliday(date, name) {
+            const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            holidays[key] = name;
+        }
+
+        // Fixed Holidays
+        addHoliday(new Date(year, 0, 1), 'Neujahr');
+        addHoliday(new Date(year, 0, 6), 'Heilige Drei Könige');
+        addHoliday(new Date(year, 4, 1), 'Tag der Arbeit');
+        addHoliday(new Date(year, 9, 3), 'Tag der Deutschen Einheit');
+        addHoliday(new Date(year, 10, 1), 'Allerheiligen');
+        addHoliday(new Date(year, 11, 25), '1. Weihnachtstag');
+        addHoliday(new Date(year, 11, 26), '2. Weihnachtstag');
+
+        // Easter calculation (Anonymous Gregorian algorithm)
+        const a = year % 19;
+        const b = Math.floor(year / 100);
+        const c = year % 100;
+        const d = Math.floor(b / 4);
+        const e = b % 4;
+        const f = Math.floor((b + 8) / 25);
+        const g = Math.floor((b - f + 1) / 3);
+        const h = (19 * a + b - d - g + 15) % 30;
+        const i = Math.floor(c / 4);
+        const k = c % 4;
+        const l = (32 + 2 * e + 2 * i - h - k) % 7;
+        const m = Math.floor((a + 11 * h + 22 * l) / 451);
+        const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+        const day = ((h + l - 7 * m + 114) % 31) + 1;
+
+        const easterSunday = new Date(year, month, day);
+
+        // Easter-dependent movable holidays
+        const addDays = (base, days) => new Date(base.getTime() + days * 86400000);
+
+        addHoliday(addDays(easterSunday, -2), 'Karfreitag');
+        addHoliday(addDays(easterSunday, 1), 'Ostermontag');
+        addHoliday(addDays(easterSunday, 39), 'Christi Himmelfahrt');
+        addHoliday(addDays(easterSunday, 50), 'Pfingstmontag');
+        addHoliday(addDays(easterSunday, 60), 'Fronleichnam');
+
+        return holidays;
+    }
+
+    // --- ISO Week Number Calculation ---
+    function getISOWeek(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        initYearSelector();
+        initMonthSelector();
+        renderStatusToolbar();
+        renderTable();
+
+        document.addEventListener('mouseup', () => { isMouseDown = false; });
+    });
+
+    function initYearSelector() {
+        const yearSelect = document.getElementById('year-select');
+        const currentYear = new Date().getFullYear();
+        yearSelect.innerHTML = '';
+        for (let y = currentYear - 2; y <= currentYear + 3; y++) {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            if (y === selectedYear) opt.selected = true;
+            yearSelect.appendChild(opt);
+        }
+        yearSelect.addEventListener('change', (e) => {
+            selectedYear = parseInt(e.target.value, 10);
+            renderTable();
+        });
+    }
+
+    function initMonthSelector() {
+        const monthSelect = document.getElementById('month-select');
+        monthSelect.value = selectedMonth;
+        monthSelect.addEventListener('change', (e) => {
+            selectedMonth = parseInt(e.target.value, 10);
+            renderTable();
+        });
+    }
+
+    // --- Render Toolbar & Legend ---
+    function renderStatusToolbar() {
+        const toolbar = document.getElementById('status-toolbar');
+        toolbar.innerHTML = '<span style="font-weight:600; font-size:12px; margin-right:5px;">Status auswählen:</span>';
+
+        const eraserBtn = document.createElement('button');
+        eraserBtn.className = `status-btn ${activeStatusId === null ? 'active' : ''}`;
+        eraserBtn.style.backgroundColor = '#ffffff';
+        eraserBtn.style.color = '#334155';
+        eraserBtn.style.borderColor = '#cbd5e1';
+        eraserBtn.innerHTML = '<span>❌</span> Radiergummi';
+        eraserBtn.onclick = () => selectStatus(null);
+        toolbar.appendChild(eraserBtn);
+
+        categories.forEach(cat => {
+            const btn = document.createElement('button');
+            btn.className = `status-btn ${cat.id === activeStatusId ? 'active' : ''}`;
+            btn.style.backgroundColor = cat.color;
+            btn.style.color = cat.textColor;
+            btn.innerHTML = `<span>[${cat.code}]</span> ${cat.label}`;
+            btn.onclick = () => selectStatus(cat.id);
+            toolbar.appendChild(btn);
+        });
+
+        renderLegend();
+    }
+
+    function selectStatus(catId) {
+        activeStatusId = catId;
+        renderStatusToolbar();
+    }
+
+    function renderLegend() {
+        const container = document.getElementById('legend-container');
+        container.innerHTML = '';
+
+        categories.forEach(cat => {
+            const item = document.createElement('div');
+            item.className = 'legend-item';
+            item.innerHTML = `
+                <span class="legend-box" style="background-color:${cat.color};"></span>
+                <span><strong>${cat.code}</strong> = ${cat.label}</span>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    // --- Table Rendering ---
+    function renderTable() {
+        const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+        const holidays = getGermanHolidays(selectedYear);
+
+        const kwRow = document.getElementById('header-kw-row');
+        const dayRow = document.getElementById('header-day-row');
+        const numRow = document.getElementById('header-num-row');
+        const tbody = document.getElementById('planner-tbody');
+
+        kwRow.innerHTML = '<th class="col-sticky-1">KW</th>';
+        dayRow.innerHTML = '<th class="col-sticky-1">Tag</th>';
+        numRow.innerHTML = '<th class="col-sticky-1">Mitarbeiter</th>';
+        tbody.innerHTML = '';
+
+        const dayNames = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+        // Dynamic Columns Generation
+        let currentKW = null;
+        let kwSpan = 0;
+        let kwThList = [];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(selectedYear, selectedMonth, day);
+            const dayOfWeek = date.getDay();
+            const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+            const dateStr = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const isHoliday = holidays.hasOwnProperty(dateStr);
+
+            // KW Row Logic
+            const kw = getISOWeek(date);
+            if (kw !== currentKW) {
+                if (currentKW !== null) {
+                    kwThList[kwThList.length - 1].colSpan = kwSpan;
+                }
+                currentKW = kw;
+                kwSpan = 1;
+                const thKw = document.createElement('th');
+                thKw.className = 'header-kw';
+                thKw.textContent = 'KW ' + kw;
+                kwThList.push(thKw);
+            } else {
+                kwSpan++;
+            }
+
+            // Day Name Header
+            const thDay = document.createElement('th');
+            thDay.className = `header-day ${isWeekend ? 'weekend' : ''} ${isHoliday ? 'holiday' : ''}`;
+            thDay.textContent = dayNames[dayOfWeek];
+            if (isHoliday) thDay.title = holidays[dateStr];
+            dayRow.appendChild(thDay);
+
+            // Day Num Header
+            const thNum = document.createElement('th');
+            thNum.className = `header-num ${isWeekend ? 'weekend' : ''} ${isHoliday ? 'holiday' : ''}`;
+            thNum.textContent = day;
+            if (isHoliday) thNum.title = holidays[dateStr];
+            numRow.appendChild(thNum);
+        }
+
+        if (kwThList.length > 0) {
+            kwThList[kwThList.length - 1].colSpan = kwSpan;
+            kwThList.forEach(th => kwRow.appendChild(th));
+        }
+
+        // Add Summary Column Headers
+        categories.forEach(cat => {
+            const th = document.createElement('th');
+            th.className = 'col-summary';
+            th.textContent = cat.code;
+            th.title = cat.label;
+            numRow.appendChild(th);
+        });
+
+        // Rows Rendering
+        structure.forEach((item, empIndex) => {
+            const tr = document.createElement('tr');
+
+            if (item.type === 'dept') {
+                tr.className = 'dept-header-row';
+                const td = document.createElement('td');
+                td.colSpan = daysInMonth + 1 + categories.length;
+                td.textContent = item.name;
+                tr.appendChild(td);
+            } else {
+                const tdName = document.createElement('td');
+                tdName.className = 'col-sticky-1';
+                tdName.textContent = item.name;
+                tr.appendChild(tdName);
+
+                const empCounts = {};
+                categories.forEach(c => empCounts[c.id] = 0);
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(selectedYear, selectedMonth, day);
+                    const dayOfWeek = date.getDay();
+                    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+                    const dateStr = `${selectedYear}-${String(selectedMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const isHoliday = holidays.hasOwnProperty(dateStr);
+
+                    const td = document.createElement('td');
+                    td.className = `day-cell ${isWeekend ? 'weekend' : ''} ${isHoliday ? 'holiday' : ''}`;
+                    td.dataset.empIndex = empIndex;
+                    td.dataset.day = day;
+
+                    const statusId = attendanceData[getStorageKey(empIndex, day)];
+                    if (statusId) {
+                        const cat = categories.find(c => c.id === statusId);
+                        if (cat) {
+                            td.textContent = cat.code;
+                            td.style.backgroundColor = cat.color;
+                            td.style.color = cat.textColor;
+                            empCounts[cat.id]++;
+                        }
+                    }
+
+                    // Interactive Drawing
+                    td.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        isMouseDown = true;
+                        applyStatus(td, empIndex, day);
+                    });
+                    td.addEventListener('mouseenter', () => {
+                        if (isMouseDown) {
+                            applyStatus(td, empIndex, day);
+                        }
+                    });
+
+                    tr.appendChild(td);
+                }
+
+                // Append Summary Cells
+                categories.forEach(cat => {
+                    const tdSummary = document.createElement('td');
+                    tdSummary.className = 'col-summary';
+                    tdSummary.textContent = empCounts[cat.id] || 0;
+                    tr.appendChild(tdSummary);
+                });
+            }
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    function getStorageKey(empIndex, day) {
+        return `${selectedYear}-${selectedMonth}-${empIndex}-${day}`;
+    }
+
+    function applyStatus(td, empIndex, day) {
+        const key = getStorageKey(empIndex, day);
+        if (activeStatusId === null) {
+            delete attendanceData[key];
+        } else {
+            attendanceData[key] = activeStatusId;
+        }
+        localStorage.setItem('planner_data', JSON.stringify(attendanceData));
+        renderTable();
+    }
+
+    function clearCurrentMonth() {
+        if (confirm('Möchten Sie wirklich alle Einträge für den aktuellen Monat löschen?')) {
+            const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+            structure.forEach((item, empIndex) => {
+                if (item.type === 'emp') {
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        delete attendanceData[getStorageKey(empIndex, day)];
+                    }
+                }
+            });
+            localStorage.setItem('planner_data', JSON.stringify(attendanceData));
+            renderTable();
+        }
+    }
+
+    // --- Modal Handling ---
+    function openModal(modalId) {
+        if (modalId === 'employee-modal') {
+            tempStructure = JSON.parse(JSON.stringify(structure));
+            renderEmployeeModalList();
+        } else if (modalId === 'category-modal') {
+            tempCategories = JSON.parse(JSON.stringify(categories));
+            renderCategoryModalList();
+        }
+        document.getElementById(modalId).style.display = 'flex';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // --- Employee Management ---
+    function renderEmployeeModalList() {
+        const container = document.getElementById('employee-list-container');
+        container.innerHTML = '';
+
+        tempStructure.forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.className = 'emp-item';
+
+            const typeLabel = document.createElement('span');
+            typeLabel.style.fontSize = '12px';
+            typeLabel.style.width = '70px';
+            typeLabel.style.fontWeight = 'bold';
+            typeLabel.textContent = item.type === 'dept' ? 'Abteilung:' : 'Mitarbeiter:';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = item.name;
+            input.onchange = (e) => tempStructure[idx].name = e.target.value;
+
+            const btnUp = document.createElement('button');
+            btnUp.className = 'btn-move';
+            btnUp.textContent = '▲';
+            btnUp.disabled = idx === 0;
+            btnUp.onclick = () => moveStructureItem(idx, -1);
+
+            const btnDown = document.createElement('button');
+            btnDown.className = 'btn-move';
+            btnDown.textContent = '▼';
+            btnDown.disabled = idx === tempStructure.length - 1;
+            btnDown.onclick = () => moveStructureItem(idx, 1);
+
+            const btnDel = document.createElement('button');
+            btnDel.className = 'btn-action btn-danger';
+            btnDel.textContent = '🗑️';
+            btnDel.onclick = () => {
+                tempStructure.splice(idx, 1);
+                renderEmployeeModalList();
+            };
+
+            div.appendChild(typeLabel);
+            div.appendChild(input);
+            div.appendChild(btnUp);
+            div.appendChild(btnDown);
+            div.appendChild(btnDel);
+
+            container.appendChild(div);
+        });
+    }
+
+    function moveStructureItem(idx, dir) {
+        const target = idx + dir;
+        if (target < 0 || target >= tempStructure.length) return;
+        const item = tempStructure.splice(idx, 1)[0];
+        tempStructure.splice(target, 0, item);
+        renderEmployeeModalList();
+    }
+
+    function addEmployeeRow() {
+        tempStructure.push({ type: 'emp', name: 'Neuer Mitarbeiter' });
+        renderEmployeeModalList();
+    }
+
+    function addDepartmentRow() {
+        tempStructure.push({ type: 'dept', name: 'Neue Abteilung' });
+        renderEmployeeModalList();
+    }
+
+    function saveEmployees() {
+        structure = tempStructure;
+        localStorage.setItem('planner_structure', JSON.stringify(structure));
+        renderTable();
+        closeModal('employee-modal');
+    }
+
+    // --- Category Management ---
+    function renderCategoryModalList() {
+        const container = document.getElementById('category-list-container');
+        container.innerHTML = '';
+
+        tempCategories.forEach((cat, idx) => {
+            const div = document.createElement('div');
+            div.className = 'cat-item';
+
+            const inputLabel = document.createElement('input');
+            inputLabel.type = 'text';
+            inputLabel.value = cat.label;
+            inputLabel.placeholder = 'Bezeichnung';
+            inputLabel.onchange = (e) => tempCategories[idx].label = e.target.value;
+
+            const inputCode = document.createElement('input');
+            inputCode.type = 'text';
+            inputCode.value = cat.code;
+            inputCode.style.width = '45px';
+            inputCode.placeholder = 'Kürzel';
+            inputCode.onchange = (e) => tempCategories[idx].code = e.target.value;
+
+            const inputColor = document.createElement('input');
+            inputColor.type = 'color';
+            inputColor.value = cat.color;
+            inputColor.title = 'Hintergrundfarbe';
+            inputColor.onchange = (e) => tempCategories[idx].color = e.target.value;
+
+            const inputTextColor = document.createElement('input');
+            inputTextColor.type = 'color';
+            inputTextColor.value = cat.textColor || '#000000';
+            inputTextColor.title = 'Textfarbe';
+            inputTextColor.onchange = (e) => tempCategories[idx].textColor = e.target.value;
+
+            const btnDel = document.createElement('button');
+            btnDel.className = 'btn-action btn-danger';
+            btnDel.textContent = '🗑️';
+            btnDel.onclick = () => {
+                tempCategories.splice(idx, 1);
+                renderCategoryModalList();
+            };
+
+            div.appendChild(inputLabel);
+            div.appendChild(inputCode);
+            div.appendChild(inputColor);
+            div.appendChild(inputTextColor);
+            div.appendChild(btnDel);
+
+            container.appendChild(div);
+        });
+    }
+
+    function addCategoryRow() {
+        const id = 'cat_' + Date.now();
+        tempCategories.push({ id, label: 'Neuer Status', code: 'N', color: '#e2e8f0', textColor: '#000000' });
+        renderCategoryModalList();
+    }
+
+    function saveCategories() {
+        categories = tempCategories;
+        localStorage.setItem('planner_categories', JSON.stringify(categories));
+
+        if (!categories.find(c => c.id === activeStatusId)) {
+            activeStatusId = categories[0] ? categories[0].id : null;
+        }
+
+        renderStatusToolbar();
+        renderTable();
+        closeModal('category-modal');
+    }
+</script>
+</body>
+</html>
