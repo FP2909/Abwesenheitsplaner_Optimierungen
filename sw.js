@@ -1,4 +1,4 @@
-const CACHE_NAME = 'anwesenheitsplaner-v2.6';
+const CACHE_NAME = 'anwesenheitsplaner-v2.6.1';
 const APP_FILES = [
   './',
   './index.html',
