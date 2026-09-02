@@ -1,7 +1,7 @@
 const CACHE_NAME = 'anwesenheitsplaner-v2.6';
 const APP_FILES = [
   './',
-  './Anwesenheitsplaner_PWA_V2.6.html',
+  './index.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png'
@@ -18,5 +18,5 @@ self.addEventListener('fetch', event => {
     const copy = response.clone();
     caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
     return response;
-  }).catch(() => caches.match('./Anwesenheitsplaner_PWA_V2.6.html'))));
+  }).catch(() => caches.match('./index.html'))));
 });
